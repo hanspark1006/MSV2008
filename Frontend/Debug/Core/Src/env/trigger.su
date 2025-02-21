@@ -1,0 +1,2 @@
+../Core/Src/env/trigger.c:41:6:trigger_init	16	static
+../Core/Src/env/trigger.c:48:6:trigger_set	24	static

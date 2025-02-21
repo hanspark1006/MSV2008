@@ -1,0 +1,11 @@
+D:/project/yns/MSV2008/Backend/Core/Src/m_event/m_event_queue.h:53:24:push_event0	1
+D:/project/yns/MSV2008/Backend/Core/Src/m_event/m_event_queue.h:54:24:push_event1	1
+../Core/Src/m_serial/m_front.c:56:13:reset_queue	1
+../Core/Src/m_serial/m_front.c:61:6:front_push_buf	2
+../Core/Src/m_serial/m_front.c:71:16:pop_buf	2
+../Core/Src/m_serial/m_front.c:81:17:find_cmd	6
+../Core/Src/m_serial/m_front.c:102:13:parse_front_cmd	5
+../Core/Src/m_serial/m_front.c:122:6:frontTask	3
+../Core/Src/m_serial/m_front.c:140:6:m_front_update_trigger_status	1
+../Core/Src/m_serial/m_front.c:148:6:m_front_response	1
+../Core/Src/m_serial/m_front.c:156:9:m_front_init	1

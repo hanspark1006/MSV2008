@@ -1,0 +1,5 @@
+../Core/Src/config/app_config_flash.c:41:5:app_config_flash_config_store	8
+../Core/Src/config/app_config_flash.c:60:5:app_config_flash_config_load	5
+../Core/Src/config/app_config_flash.c:81:13:set_default_fgpa_value	2
+../Core/Src/config/app_config_flash.c:96:5:app_config_flash_renew	6
+../Core/Src/config/app_config_flash.c:117:5:app_config_flash_init	6

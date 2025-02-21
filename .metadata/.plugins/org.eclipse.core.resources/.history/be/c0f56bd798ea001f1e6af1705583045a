@@ -1,0 +1,27 @@
+/*
+ * m_event_def.c
+ *
+ *  Created on: Feb 6, 2024
+ *      Author: catsa
+ */
+#include "main.h"
+#include "m_event_def.h"
+/* Private typedef -----------------------------------------------------------*/
+/* Private define ------------------------------------------------------------*/
+/* Private macro -------------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
+/* Private function prototypes -----------------------------------------------*/
+const char* event_type_2_str(event_type_t evt)
+{
+    switch (evt)
+    {
+    	case_str(EVT_none)
+		case_str(EVT_Remote_rs232)
+		case_str(EVT_Remote_Ether)
+    	default :
+			break;
+    }
+
+    return "Unknown event";
+}
+

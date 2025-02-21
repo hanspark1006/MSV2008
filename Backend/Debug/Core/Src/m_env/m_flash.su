@@ -1,0 +1,3 @@
+../Core/Src/m_env/m_flash.c:29:5:m_flash_config_erase	48	static
+../Core/Src/m_env/m_flash.c:60:6:m_flash_config_read	24	static
+../Core/Src/m_env/m_flash.c:70:5:m_flash_config_write	48	static

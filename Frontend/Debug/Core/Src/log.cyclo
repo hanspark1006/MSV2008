@@ -1,0 +1,5 @@
+../Core/Src/log.c:28:6:Printf	1
+../Core/Src/log.c:39:13:hex_dump_line_print	3
+../Core/Src/log.c:51:6:dump_printf	3
+../Core/Src/log.c:68:13:screen_id_2_str	15
+../Core/Src/log.c:92:13:key_id_2_str	14

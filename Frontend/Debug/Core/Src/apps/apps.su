@@ -1,0 +1,7 @@
+../Core/Src/apps/apps.c:58:9:key_check	16	static
+../Core/Src/apps/apps.c:81:6:btn_tmr_callback	16	static
+../Core/Src/apps/apps.c:95:6:set_skip_key	4	static
+../Core/Src/apps/apps.c:102:7:key_process	24	static
+../Core/Src/apps/apps.c:181:6:run_menu	24	static
+../Core/Src/apps/apps.c:227:6:AppsTask	16	static
+../Core/Src/apps/apps.c:253:5:apps_init	16	static

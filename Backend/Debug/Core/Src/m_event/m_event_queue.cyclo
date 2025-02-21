@@ -1,0 +1,5 @@
+../Core/Src/m_event/m_event_queue.c:23:5:m_event_register	2
+../Core/Src/m_event/m_event_queue.c:36:5:m_event_push	10
+../Core/Src/m_event/m_event_queue.c:87:13:__free_event	3
+../Core/Src/m_event/m_event_queue.c:96:6:m_event_dispatch	5
+../Core/Src/m_event/m_event_queue.c:125:5:m_event_init	3

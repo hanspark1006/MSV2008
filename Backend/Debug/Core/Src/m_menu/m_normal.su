@@ -1,0 +1,16 @@
+D:/project/yns/MSV2008/Backend/Core/Src/m_event/m_event_queue.h:53:24:push_event0	24	static
+D:/project/yns/MSV2008/Backend/Core/Src/m_event/m_event_queue.h:54:24:push_event1	24	static
+../Core/Src/m_menu/m_normal.c:59:6:on_measure	16	static
+../Core/Src/m_menu/m_normal.c:70:13:onPushTcpData	24	static
+../Core/Src/m_menu/m_normal.c:79:13:onSaveConfg	32	static
+../Core/Src/m_menu/m_normal.c:92:13:onStartStrobe	40	static
+../Core/Src/m_menu/m_normal.c:127:13:onStartSelfTest	24	static
+../Core/Src/m_menu/m_normal.c:150:13:onSetDeviceID	16	static
+../Core/Src/m_menu/m_normal.c:155:16:check_test_done	16	static
+../Core/Src/m_menu/m_normal.c:169:13:demo1st	16	static
+../Core/Src/m_menu/m_normal.c:183:13:demo2nd	24	static
+../Core/Src/m_menu/m_normal.c:204:13:demo3rd	16	static
+../Core/Src/m_menu/m_normal.c:214:13:runDemoTest	16	static
+../Core/Src/m_menu/m_normal.c:238:13:DemoProcTask	24	static
+../Core/Src/m_menu/m_normal.c:262:13:evt_handler	16	static
+../Core/Src/m_menu/m_normal.c:295:5:m_menu_normal_init	64	static

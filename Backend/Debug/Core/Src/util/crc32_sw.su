@@ -1,0 +1,2 @@
+../Core/Src/util/crc32_sw.c:19:10:crc32_ieee	16	static
+../Core/Src/util/crc32_sw.c:24:10:crc32_ieee_update	32	static

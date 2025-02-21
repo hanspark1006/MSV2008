@@ -1,0 +1,13 @@
+D:/project/yns/MSV2008/Backend/Core/Src/m_event/m_event_queue.h:53:24:push_event0	1
+D:/project/yns/MSV2008/Backend/Core/Src/m_event/m_event_queue.h:54:24:push_event1	1
+../Core/Src/m_serial/m_remote.c:39:6:remote_push_buf	5
+../Core/Src/m_serial/m_remote.c:57:9:remote_pop_buf	2
+../Core/Src/m_serial/m_remote.c:66:13:On_set_mode	3
+../Core/Src/m_serial/m_remote.c:77:6:m_remote_response	2
+../Core/Src/m_serial/m_remote.c:93:13:Remote_Command_2_str	14
+../Core/Src/m_serial/m_remote.c:117:16:parse_command	16
+../Core/Src/m_serial/m_remote.c:195:9:m_remote_front_parser	1
+../Core/Src/m_serial/m_remote.c:204:9:m_remote_eth_parser	11
+../Core/Src/m_serial/m_remote.c:248:13:RemoteProcTask	9
+../Core/Src/m_serial/m_remote.c:287:13:evt_handler	2
+../Core/Src/m_serial/m_remote.c:298:9:remote_proc_init	4

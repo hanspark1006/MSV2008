@@ -1,0 +1,10 @@
+16:20:04 **** Incremental Build of configuration Debug for project Backend ****
+make -j12 all 
+arm-none-eabi-size  Backend.elf 
+   text	   data	    bss	    dec	    hex	filename
+  64268	   5768	  80488	 150524	  24bfc	Backend.elf
+Finished building: default.size.stdout
+ 
+
+16:20:05 Build Finished. 0 errors, 0 warnings. (took 858ms)
+

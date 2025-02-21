@@ -1,0 +1,5 @@
+../Core/Src/m_serial/m_serial.c:50:6:HAL_UART_RxCpltCallback	16	static
+../Core/Src/m_serial/m_serial.c:66:6:HAL_UART_TxCpltCallback	16	static
+../Core/Src/m_serial/m_serial.c:72:5:m_serial_send	40	static
+../Core/Src/m_serial/m_serial.c:142:6:m_serial_SendPC	16	static
+../Core/Src/m_serial/m_serial.c:148:5:m_serial_init	16	static

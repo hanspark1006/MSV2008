@@ -1,0 +1,4 @@
+../Core/Src/log.c:28:6:Printf	16	static
+../Core/Src/log.c:42:13:hex_dump_line_print	24	static
+../Core/Src/log.c:54:6:dump_printf	32	static
+../Core/Src/log.c:71:6:Debug_Init	16	static
