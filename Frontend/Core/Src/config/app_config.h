@@ -42,6 +42,6 @@ enum{
 };
 /* Exported functions ------------------------------------------------------- */
 void app_config_init(void);
-void app_save_config(void);
+int app_save_config(void);
 uint8_t app_read_config(config_t *pConfig);
 #endif /* __APP_CONFIG_H */

@@ -42,7 +42,8 @@ Core/Src/env/uart.o: ../Core/Src/env/uart.c \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
- ../Core/Inc/log.h ../Core/Src/env/uart.h ../Core/Src/env/trigger.h
+ ../Core/Inc/log.h ../Core/Inc/macros_common.h ../Core/Src/env/uart.h \
+ ../Core/Src/env/trigger.h
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
@@ -88,5 +89,6 @@ Core/Src/env/uart.o: ../Core/Src/env/uart.c \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h:
 ../Core/Inc/log.h:
+../Core/Inc/macros_common.h:
 ../Core/Src/env/uart.h:
 ../Core/Src/env/trigger.h:

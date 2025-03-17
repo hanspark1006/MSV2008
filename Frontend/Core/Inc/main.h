@@ -32,6 +32,7 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "log.h"
+#include "macros_common.h"
 #include "errno.h"
 /* USER CODE END Includes */
 

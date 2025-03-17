@@ -42,11 +42,12 @@ void app_config_init(void)
 		set_default_config();
 	}
 	m_app_config = &m_flash_cfg;
+	LOG_HEX_DUMP(&m_flash_cfg, sizeof(config_t), "Config Data");
 }
 
-void app_save_config(void)
+int app_save_config(void)
 {
-	m_flash_config_write((void *)&m_flash_cfg, sizeof(config_t));
+	return m_flash_config_write((void *)&m_flash_cfg, sizeof(config_t));
 }
 
 uint8_t app_read_config(config_t *pConfig)

@@ -2,6 +2,6 @@
 ../Core/Src/apps/apps.c:81:6:btn_tmr_callback	6
 ../Core/Src/apps/apps.c:95:6:set_skip_key	1
 ../Core/Src/apps/apps.c:102:7:key_process	20
-../Core/Src/apps/apps.c:181:6:run_menu	10
-../Core/Src/apps/apps.c:227:6:AppsTask	3
-../Core/Src/apps/apps.c:253:5:apps_init	2
+../Core/Src/apps/apps.c:182:6:run_menu	11
+../Core/Src/apps/apps.c:231:6:AppsTask	3
+../Core/Src/apps/apps.c:257:5:apps_init	2

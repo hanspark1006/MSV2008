@@ -752,3 +752,81 @@ Command-line arguments:  -os win32 -ws win32 -arch x86_64
 
 !ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-02-21 07:41:28.890
 !MESSAGE Started RMI Server, listening on port 41337
+!SESSION 2025-02-25 07:54:26.157 -----------------------------------------------
+eclipse.buildId=Version 1.17.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=ko_KR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-02-25 07:54:40.660
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-02-25 07:54:40.661
+!MESSAGE Log4j2 initialized with config file D:\project\yns\MSV2008\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-02-25 07:54:50.109
+!MESSAGE Started RMI Server, listening on port 41337
+!SESSION 2025-03-05 09:33:43.824 -----------------------------------------------
+eclipse.buildId=Version 1.17.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=ko_KR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-03-05 09:33:59.962
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-03-05 09:33:59.963
+!MESSAGE Log4j2 initialized with config file D:\project\yns\MSV2008\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-03-05 09:34:06.823
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.equinox.p2.touchpoint.natives 2 0 2025-03-05 09:39:37.225
+!MESSAGE Could not remove temporary backup directory (it is safe to manually delete it and its contents): C:\Users\catsa\AppData\Local\Temp\STM32CubeIDE_300e46d1-78f9-4feb-a4b9-ba769aed6274
+!SESSION 2025-03-05 09:40:12.661 -----------------------------------------------
+eclipse.buildId=Version 1.17.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=ko_KR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 -data file:/D:/project/yns/MSV2008/
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-03-05 09:41:02.458
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-03-05 09:41:02.459
+!MESSAGE Log4j2 initialized with config file D:\project\yns\MSV2008\.metadata\.log4j2.xml
+!SESSION 2025-03-05 09:43:55.642 -----------------------------------------------
+eclipse.buildId=Version 1.18.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=ko_KR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-03-05 09:44:02.129
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-03-05 09:44:02.130
+!MESSAGE Log4j2 initialized with config file D:\project\yns\MSV2008\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-03-05 09:44:09.361
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.cdt.core 1 0 2025-03-05 10:23:32.201
+!MESSAGE Indexed 'Frontend' (41 sources, 146 headers) in 3.43 sec: 12,583 declarations; 61,464 references; 2 unresolved inclusions; 145 syntax errors; 189 unresolved names (0.25%)
+!SESSION 2025-03-17 15:26:45.992 -----------------------------------------------
+eclipse.buildId=Version 1.18.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=ko_KR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-03-17 15:28:18.703
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-03-17 15:28:18.704
+!MESSAGE Log4j2 initialized with config file D:\project\yns\MSV2008\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-03-17 15:28:24.700
+!MESSAGE Started RMI Server, listening on port 41337

@@ -51,18 +51,23 @@ void m_flash_config_read(void *pBuffer, int size)
 int m_flash_config_write(void *Data_p, int size)
 {
 	unsigned int write_size =0;
-	uint32_t Address, write_data, *pData;
+	uint32_t Address, write_data;
+	uint16_t *pData;
 
 	Address = FRONT_CONFIG_ADDRESS;
 
-	pData = (uint32_t *)Data_p;
+	pData = (uint16_t *)Data_p;
+
+	if(m_flash_config_erase()){
+		return -1;
+	}
 
 	HAL_FLASH_Unlock();
 
 	while(write_size < size)
 	{
-		write_data = (uint32_t)*pData;
-		if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, Address, write_data) != HAL_OK)
+		write_data = (uint16_t)*pData;
+		if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, Address, write_data) != HAL_OK)
 		{
 
 			LOG_ERR("Flash Write Error [%lx] TotSize[%d] WriteSize[%d]", HAL_FLASH_GetError(), size, write_size);
@@ -71,8 +76,8 @@ int m_flash_config_write(void *Data_p, int size)
 			return -1;
 		}
 		pData++;
-		write_size+=4;
-		Address +=4;
+		write_size+=2;
+		Address +=2;
 	}
 
 	HAL_FLASH_Lock();

@@ -25,7 +25,8 @@ Core/Src/log.o: ../Core/Src/log.c ../Core/Inc/main.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
- ../Core/Inc/log.h D:/project/yns/MSV2008/Frontend/Core/Src/apps/apps.h \
+ ../Core/Inc/log.h ../Core/Inc/macros_common.h \
+ D:/project/yns/MSV2008/Frontend/Core/Src/apps/apps.h \
  D:/project/yns/MSV2008/Frontend/Core/Src/lcd/screen.h ../Core/Inc/log.h \
  ../Core/Inc/macros_common.h
 ../Core/Inc/main.h:
@@ -56,6 +57,7 @@ Core/Src/log.o: ../Core/Src/log.c ../Core/Inc/main.h \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h:
 ../Core/Inc/log.h:
+../Core/Inc/macros_common.h:
 D:/project/yns/MSV2008/Frontend/Core/Src/apps/apps.h:
 D:/project/yns/MSV2008/Frontend/Core/Src/lcd/screen.h:
 ../Core/Inc/log.h:

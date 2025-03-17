@@ -25,7 +25,7 @@ Core/Src/env/trigger.o: ../Core/Src/env/trigger.c ../Core/Inc/main.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
- ../Core/Inc/log.h ../Core/Src/env/trigger.h
+ ../Core/Inc/log.h ../Core/Inc/macros_common.h ../Core/Src/env/trigger.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
@@ -54,4 +54,5 @@ Core/Src/env/trigger.o: ../Core/Src/env/trigger.c ../Core/Inc/main.h \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h:
 ../Core/Inc/log.h:
+../Core/Inc/macros_common.h:
 ../Core/Src/env/trigger.h:

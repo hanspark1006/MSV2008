@@ -183,24 +183,25 @@ ScreenID_t screen_process(ScreenID_t screen_id, Key_t key)
 static void draw_title(uint8_t step)
 {
 	char line_1_buf[LCD_PRINT_MAX], line_2_buf[LCD_PRINT_MAX];
-	uint8_t ch = m_cfg.cur_ch+1;
-	LOG_INF("start Draw title [%d]\r\n", step);
+	uint8_t ch = m_cfg.cur_ch;
+	uint8_t disp_ch = m_cfg.cur_ch+1;
+	LOG_INF("start Draw title [%d] ch[%d]\r\n", step, ch);
 
 	switch(step){
 		case eCH_CHSelect:
-			sprintf(line_1_buf, "CH%d   Operation\n", ch);
+			sprintf(line_1_buf, "CH%d   Operation\n", disp_ch);
 			sprintf(line_2_buf, "OnTime : %5dus", load_cfg.on_time[ch]);
 			break;
 		case eCH_OnTIME:
-			sprintf(line_1_buf, "CH%d On-Time     \n", ch);
+			sprintf(line_1_buf, "CH%d On-Time     \n", disp_ch);
 			sprintf(line_2_buf, "Value : %5d us", load_cfg.on_time[ch]);
 			break;
 		case eCH_DelayTIME:
-			sprintf(line_1_buf, "CH%d Delay-Time  \n", ch);
+			sprintf(line_1_buf, "CH%d Delay-Time  \n", disp_ch);
 			sprintf(line_2_buf, "Value : %5d us", load_cfg.delay_time[ch]);
 			break;
 		case eCH_TriggerSet:
-			sprintf(line_1_buf, "CH%d Trigger Set \n", ch);
+			sprintf(line_1_buf, "CH%d Trigger Set \n", disp_ch);
 			sprintf(line_2_buf, "Value : %s \n", load_cfg.edge[ch]?"Rising":"Falling");
 			memcpy(m_cfg.blink_text[0], line_2_buf, 17);
 			sprintf(m_cfg.blink_text[1],"Value :         ");
@@ -254,6 +255,8 @@ static void draw_title(uint8_t step)
 			sprintf(line_2_buf, "M - FW : Ver %1d.%1d\n", load_cfg.backendVer/10, load_cfg.backendVer%10);
 			break;
 	}
+	LOG_DBG("Line 1 [%s]", line_1_buf);
+	LOG_DBG("Line 2 [%s]", line_2_buf);
 	LCD_LOCATE(1,1);
 	LCD_printstring(line_1_buf);
 	LCD_LOCATE(2,1);
@@ -265,10 +268,12 @@ static void split_num(uint16_t value, int8_t *array)
 {
 	int num = value, i;
 
+	LOG_DBG("Value : %d", value);
 	for(i = m_cfg.digit_num; i >= 0; i--){
 		array[i] = -1;  // init value
 		if(num){
 			array[i] = num%10;
+			LOG_DBG("Split num[%d] => %d", i, array[i]);
 			num/=10;
 		}
 	}
@@ -363,9 +368,12 @@ ScreenID_t set_changetime_func(Screen_param_t param)
 				cmd = eCMD_Delaytime;
 				set_time = (uint32_t)load_cfg.delay_time[channel];
 			}
-			send_cmd_2_backend(cmd, channel, set_time);
-			save_data();
-			break;
+			if(save_data() != eMAX_SCREEN_ID){
+				ret_sc = eERROR_SC;
+				return ret_sc;
+			}else{
+				send_cmd_2_backend(cmd, channel, set_time);
+			}
 		case eKey_Mode:
 			if(param.sc_id == eSET_ON_TIME_SC){
 				draw_title(eCH_DelayTIME);
@@ -406,9 +414,12 @@ ScreenID_t set_changetime_func(Screen_param_t param)
 static ScreenID_t save_data(void)
 {
 	memcpy(m_app_config, &load_cfg, sizeof(config_t));
-	app_save_config();
-	draw_title(eCH_CHSelect);
-	return eMAX_SCREEN_ID;	
+	if(app_save_config() < 0){
+		return eERROR_SC;
+	}else{
+		//draw_title(eCH_CHSelect);
+		return eMAX_SCREEN_ID;
+	}
 }
 
 static void run_remote_mode(void)

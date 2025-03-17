@@ -170,6 +170,7 @@ Key_t key_process(void)
 				get_key = eKey_Idle;
 			}
 		}
+		old_key = eKey_Idle;
 		m_cfg.skip_press = 0;
 		m_cfg.key_tick = 0;
 		m_cfg.mul_press = 0;
@@ -212,8 +213,11 @@ void run_menu(Key_t input_key)
 	LOG_DBG("Change SC[%d]", m_cfg.sc_id);
 	next_sc = screen_process(m_cfg.sc_id, input_key);
 	if(next_sc < eMAX_SCREEN_ID ){
-		m_cfg.sc_id = next_sc;
-		next_sc = screen_process(m_cfg.sc_id, input_key);
+		LOG_INF("Next Sc[%d] Cur SC[%d]", next_sc, m_cfg.sc_id)
+		if(next_sc != m_cfg.sc_id){
+			m_cfg.sc_id = next_sc;
+			next_sc = screen_process(m_cfg.sc_id, eKey_Idle);
+		}
 	}else{
 		if(m_cfg.setting_mode){
 			m_cfg.setting_mode = 0;

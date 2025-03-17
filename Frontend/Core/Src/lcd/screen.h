@@ -21,7 +21,8 @@ typedef enum{
 	eFACTORY_SC,
 	eCHSELECT_SC,
 	eVERSION_SC,
-	eMAX_SCREEN_ID
+	eMAX_SCREEN_ID,
+	eERROR_SC
 }ScreenID_t;
 /* Exported constants --------------------------------------------------------*/
 enum{
