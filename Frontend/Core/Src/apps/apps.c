@@ -13,6 +13,7 @@
 /* Private define ------------------------------------------------------------*/
 #define TIMER_100_MSEC		100
 #define TIMER_10_MSEC		10
+#define TIMER_20_MSEC		20
 #define TIMER_50_MSEC		50
 #define TIMER_70_MSEC		70
 #define TIMER_1_SEC			100
@@ -36,6 +37,7 @@ static struct{
 	uint8_t mul_press;
 	uint8_t skip_press;
 	uint32_t key_tick;
+	uint8_t blink_enable;
 	uint16_t blink_tick;
 	uint8_t remote_ctrl;
 }m_cfg={
@@ -44,6 +46,7 @@ static struct{
 	.setting_mode = 0,
 	.skip_press = 0,
 	.key_tick = 0,
+	.blink_enable = 0,
 	.blink_tick = 0,
 	.remote_ctrl = 0
 };
@@ -78,17 +81,16 @@ uint8_t key_check(void)
 	return read_key;
 }
 
+static uint8_t proc_blink = 0;
+
 void btn_tmr_callback(void const *argument)
 {
 	if(m_cfg.btn_status == eBTN_PRESS){
 		m_cfg.key_tick++;
 	}
 
-	if((m_cfg.setting_mode) &&((m_cfg.sc_id == eSET_TRIGGER_SC) || (m_cfg.sc_id == eOPMODE_SC))){
-		if(m_cfg.blink_tick++ >= TIMER_50_MSEC){
-			screen_blink();
-			m_cfg.blink_tick = 0;
-		}
+	if(m_cfg.blink_enable){
+		m_cfg.blink_tick++;
 	}
 }
 
@@ -97,6 +99,7 @@ void set_skip_key(void)
 	m_cfg.key_tick = 0;
 	m_cfg.btn_status = eBTN_RELEASE;
 	m_cfg.skip_press = 1;
+	LOG_DBG("Set skip Key");
 }
 
 Key_t key_process(void)
@@ -107,6 +110,7 @@ Key_t key_process(void)
 
 	read_key = key_check();
 	if(read_key & 0x0F){ // down key
+		//LOG_DBG("Read key[%s] skip key[%d]", key_id_2_str(read_key), m_cfg.skip_press);
 		if(m_cfg.skip_press){
 			return press_key;
 		}
@@ -125,7 +129,7 @@ Key_t key_process(void)
 				break;
 		}
 		if(old_key != read_key){
-			LOG_DBG("tick[%d] %s", m_cfg.key_tick, key_id_2_str(read_key));
+			//LOG_DBG("tick[%d] %s", m_cfg.key_tick, key_id_2_str(read_key));
 			old_key = read_key;
 		}
 		if(get_key == eKey_Mode){
@@ -137,14 +141,14 @@ Key_t key_process(void)
 				multi_key = eKey_Idle;
 				m_cfg.key_tick = 0;
 			}else if(m_cfg.key_tick >= TIMER_2_SEC){
-				if(m_cfg.setting_mode == 0){
+				if((m_cfg.setting_mode == 0) && (m_cfg.remote_ctrl == 0)){
 					press_key = eKey_SetMode;
 					m_cfg.setting_mode = 1;
 					m_cfg.blink_tick = 0;
 				}else if(m_cfg.remote_ctrl){
-					m_cfg.remote_ctrl = 0;
 					press_key = eKey_ExitRemote;
 				}
+				//LOG_DBG("1.tick[%d] %s", m_cfg.key_tick, key_id_2_str(press_key));
 				set_skip_key();
 			}else{
 				return eKey_Idle;
@@ -156,15 +160,16 @@ Key_t key_process(void)
 		if((multi_key!=eKey_Idle) && (m_cfg.key_tick > TIMER_5_SEC)){
 			press_key = multi_key;
 			multi_key = eKey_Idle;
+			//LOG_DBG("2.tick[%d] %s", m_cfg.key_tick, key_id_2_str(press_key));
 			set_skip_key();
 		}
 	}else{  // up key
 		if((get_key != eKey_Idle)&& (release_old != get_key)){
-			LOG_DBG("Release[%s] tick[%d]", key_id_2_str(get_key), m_cfg.key_tick);
+			//LOG_DBG("Release[%s] tick[%d]", key_id_2_str(get_key), m_cfg.key_tick);
 			release_old = get_key;
 		}
 		m_cfg.btn_status = eBTN_RELEASE;
-		if((m_cfg.key_tick > TIMER_10_MSEC) && (m_cfg.key_tick < TIMER_50_MSEC)){
+		if((m_cfg.key_tick > TIMER_20_MSEC) && (m_cfg.key_tick < TIMER_50_MSEC)){
 			if(m_cfg.mul_press == 0){
 				press_key = get_key;
 				get_key = eKey_Idle;
@@ -183,7 +188,7 @@ void run_menu(Key_t input_key)
 {
 	ScreenID_t next_sc = eMAX_SCREEN_ID;
 
-	LOG_DBG("Old SC[%d] Key[%x]", m_cfg.sc_id, input_key);
+	//LOG_DBG("Old SC[%d] Key[%x]", m_cfg.sc_id, input_key);
 	if(m_cfg.setting_mode == 0){
 		switch(input_key){
 			case eKey_Enter:
@@ -206,21 +211,32 @@ void run_menu(Key_t input_key)
 			case eKey_Version:
 				m_cfg.sc_id = eVERSION_SC;
 				break;
+			case eKey_ExitRemote:
+				m_cfg.sc_id = eCHANNEL_SC;
+				break;
 			default:
 				break;
 		}
 	}
-	LOG_DBG("Change SC[%d]", m_cfg.sc_id);
+	//LOG_DBG("Change SC[%d]", m_cfg.sc_id);
+	//LOG_DBG("Setting mode[%d]", m_cfg.setting_mode);
 	next_sc = screen_process(m_cfg.sc_id, input_key);
 	if(next_sc < eMAX_SCREEN_ID ){
-		LOG_INF("Next Sc[%d] Cur SC[%d]", next_sc, m_cfg.sc_id)
+		//LOG_INF("Next Sc[%s] Cur SC[%s]", screen_id_2_str(next_sc), screen_id_2_str(m_cfg.sc_id));
 		if(next_sc != m_cfg.sc_id){
 			m_cfg.sc_id = next_sc;
 			next_sc = screen_process(m_cfg.sc_id, eKey_Idle);
-		}
-	}else{
-		if(m_cfg.setting_mode){
 			m_cfg.setting_mode = 0;
+			//LOG_ERR("Change screen clear setting mode");
+		}
+	}
+
+	//LOG_DBG("next Screen = %s[%d] setting mode[%d]", screen_id_2_str(next_sc), next_sc, m_cfg.setting_mode);
+	if(next_sc == eMAX_SCREEN_ID){
+		if(m_cfg.setting_mode || m_cfg.remote_ctrl){
+			//LOG_DBG("Release setting mode");
+			m_cfg.setting_mode = 0;
+			m_cfg.remote_ctrl = 0;
 			m_cfg.sc_id = eCHANNEL_SC;
 			m_cfg.list_idx = 0;
 		}
@@ -248,10 +264,34 @@ void AppsTask(void)
 	while(1){
 		read_key = key_process();
 		if(read_key != eKey_Idle){
+//			if(m_cfg.remote_ctrl){
+//				LOG_DBG("read key[%s]", key_id_2_str(read_key));
+//			}
+			if(m_cfg.remote_ctrl && (read_key != eKey_ExitRemote)){
+				osDelay(5);
+				continue;
+			}
 			run_menu(read_key);
 		}
-		osDelay(10);
+		if(m_cfg.blink_enable && (m_cfg.blink_tick >= TIMER_50_MSEC) && (proc_blink == 0)){
+			proc_blink = 1;
+			screen_blink();
+			m_cfg.blink_tick = 0;
+			proc_blink = 0;
+		}
+		osDelay(5);
 	}
+}
+
+void apps_set_remote_mode(void)
+{
+	LOG_DBG("Set remote mode");
+	m_cfg.remote_ctrl = 1;
+}
+
+void apps_set_blink_enable(uint8_t enable)
+{
+	m_cfg.blink_enable = enable;
 }
 
 int apps_init(void)

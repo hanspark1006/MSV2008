@@ -1,7 +1,9 @@
-../Core/Src/apps/apps.c:58:9:key_check	5
-../Core/Src/apps/apps.c:81:6:btn_tmr_callback	6
-../Core/Src/apps/apps.c:95:6:set_skip_key	1
-../Core/Src/apps/apps.c:102:7:key_process	20
-../Core/Src/apps/apps.c:182:6:run_menu	11
-../Core/Src/apps/apps.c:231:6:AppsTask	3
-../Core/Src/apps/apps.c:257:5:apps_init	2
+../Core/Src/apps/apps.c:61:9:key_check	5
+../Core/Src/apps/apps.c:86:6:btn_tmr_callback	3
+../Core/Src/apps/apps.c:97:6:set_skip_key	1
+../Core/Src/apps/apps.c:105:7:key_process	21
+../Core/Src/apps/apps.c:187:6:run_menu	14
+../Core/Src/apps/apps.c:247:6:AppsTask	8
+../Core/Src/apps/apps.c:286:6:apps_set_remote_mode	1
+../Core/Src/apps/apps.c:292:6:apps_set_blink_enable	1
+../Core/Src/apps/apps.c:297:5:apps_init	2

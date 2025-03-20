@@ -37,5 +37,7 @@ typedef enum{
 }Key_t;
 
 int apps_init(void);
+void apps_set_blink_enable(uint8_t enable);
+void apps_set_remote_mode(void);
 void AppsTask(void);
 #endif /* SRC_APPS_APPS_H_ */

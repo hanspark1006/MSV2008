@@ -62,6 +62,9 @@ typedef enum{
 #define LINE_CHARACTER_MAX	16
 #define LCD_PRINT_MAX		20
 #define SEL_MAX_CH			5
+
+#define MIN_PORT	1024
+#define MAX_PORT	65536
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
@@ -107,6 +110,8 @@ static struct _screen_func{
 #define MAX_SC_LIST_NUM 13
 
 static struct{
+	uint8_t set_mode;
+	uint8_t remote_mode;
 	uint8_t cur_ch;
 	uint8_t cursor;
 	int8_t input_num[5];
@@ -120,11 +125,10 @@ static struct{
 	uint8_t ip_idx;
 	uint8_t ip_digit;
 	int8_t port[5];
-	uint8_t set_mode;
-	uint8_t remote_mode;
 }m_cfg={
 	.set_mode = 0,
-	.remote_mode = eREMOTE_NONE
+	.remote_mode = eREMOTE_NONE,
+	.cur_ch = eCH1,
 };
 
 config_t load_cfg;
@@ -148,12 +152,9 @@ void screen_blink(void)
 {
 	if(m_cfg.enable_blink){
 		LCD_LOCATE(m_cfg.blink_row,1);
-		m_cfg.blink = ~m_cfg.blink;
-		if(m_cfg.blink){
-			LCD_printstring(m_cfg.blink_text[0]);
-		}else{
-			LCD_printstring(m_cfg.blink_text[1]);
-		}
+		m_cfg.blink ^= 1;
+		//LOG_DBG("Blink%d: %s", m_cfg.blink, m_cfg.blink_text[m_cfg.blink]);
+		LCD_printstring(m_cfg.blink_text[m_cfg.blink]);
 	}
 }
 
@@ -169,7 +170,7 @@ ScreenID_t screen_process(ScreenID_t screen_id, Key_t key)
 	int i;	
 	Screen_param_t sc_param;
 
-	LOG_INF("%s : key[%s]", screen_id_2_str(screen_id), key_id_2_str(key));
+	//LOG_INF("%s : key[%s] Set_mode[%d]", screen_id_2_str(screen_id), key_id_2_str(key), m_cfg.set_mode);
 	sc_param.sc_id = screen_id;
 	sc_param.key = key;
 	for(i = 0; menu_list_size; i++){
@@ -182,29 +183,30 @@ ScreenID_t screen_process(ScreenID_t screen_id, Key_t key)
 
 static void draw_title(uint8_t step)
 {
-	char line_1_buf[LCD_PRINT_MAX], line_2_buf[LCD_PRINT_MAX];
+	char line_1_buf[LCD_PRINT_MAX]={0,}, line_2_buf[LCD_PRINT_MAX]={0,};
 	uint8_t ch = m_cfg.cur_ch;
 	uint8_t disp_ch = m_cfg.cur_ch+1;
-	LOG_INF("start Draw title [%d] ch[%d]\r\n", step, ch);
+
+	//LOG_INF("start Draw title [%d] ch[%d]\r\n", step, ch);
 
 	switch(step){
 		case eCH_CHSelect:
 			sprintf(line_1_buf, "CH%d   Operation\n", disp_ch);
-			sprintf(line_2_buf, "OnTime : %5dus", load_cfg.on_time[ch]);
+			sprintf(line_2_buf, "OnTime : %5dus\n", load_cfg.on_time[ch]);
 			break;
 		case eCH_OnTIME:
 			sprintf(line_1_buf, "CH%d On-Time     \n", disp_ch);
-			sprintf(line_2_buf, "Value : %5d us", load_cfg.on_time[ch]);
+			sprintf(line_2_buf, "Value : %5d us\n", load_cfg.on_time[ch]);
 			break;
 		case eCH_DelayTIME:
 			sprintf(line_1_buf, "CH%d Delay-Time  \n", disp_ch);
-			sprintf(line_2_buf, "Value : %5d us", load_cfg.delay_time[ch]);
+			sprintf(line_2_buf, "Value : %5d us\n", load_cfg.delay_time[ch]);
 			break;
 		case eCH_TriggerSet:
 			sprintf(line_1_buf, "CH%d Trigger Set \n", disp_ch);
-			sprintf(line_2_buf, "Value : %s \n", load_cfg.edge[ch]?"Rising":"Falling");
+			sprintf(line_2_buf, "Value : %s \n", load_cfg.edge[ch]?"Rising ":"Falling");
 			memcpy(m_cfg.blink_text[0], line_2_buf, 17);
-			sprintf(m_cfg.blink_text[1],"Value :         ");
+			sprintf(m_cfg.blink_text[1],"Value :         \n");
 			break;
 		case eSEL_OPMODE:
 			sprintf(line_1_buf, "Mode Select     \n");
@@ -212,19 +214,19 @@ static void draw_title(uint8_t step)
 			break;
 		case eSET_OPMODE:
 			sprintf(line_1_buf, "Mode Selection  \n");
-			sprintf(line_2_buf, "      %s     ", load_cfg.mode?"1 : N":"1 : 1");
+			sprintf(line_2_buf, "      %s     \n", load_cfg.mode?"1 : N":"1 : 1");
 			break;
 		case eRS_DevID:
 			sprintf(line_1_buf, "RS232 Operation  \n");
-			sprintf(line_2_buf, "Device ID : %02d", load_cfg.dev_id);
+			sprintf(line_2_buf, "Device ID : %02d  \n", load_cfg.dev_id);
 			break;
 		case eIP_Set:
 			sprintf(line_1_buf, "Communication  \n");
-			sprintf(line_2_buf, "%03d.%03d.%03d.%03d ", load_cfg.ether.ipaddr[0], load_cfg.ether.ipaddr[1], load_cfg.ether.ipaddr[2], load_cfg.ether.ipaddr[3]);
+			sprintf(line_2_buf, "%03d.%03d.%03d.%03d \n", load_cfg.ether.ipaddr[0], load_cfg.ether.ipaddr[1], load_cfg.ether.ipaddr[2], load_cfg.ether.ipaddr[3]);
 			break;
 		case ePORT_Set:
 			sprintf(line_1_buf, "Communication  \n");
-			sprintf(line_2_buf, "Port : %d    \n", load_cfg.ether.port);
+			sprintf(line_2_buf, "Port : %05d    \n", load_cfg.ether.port);
 			break;
 		case eRemote_Mode:
 			sprintf(line_1_buf, "Communication  \n");
@@ -255,38 +257,44 @@ static void draw_title(uint8_t step)
 			sprintf(line_2_buf, "M - FW : Ver %1d.%1d\n", load_cfg.backendVer/10, load_cfg.backendVer%10);
 			break;
 	}
-	LOG_DBG("Line 1 [%s]", line_1_buf);
-	LOG_DBG("Line 2 [%s]", line_2_buf);
+//	LOG_DBG("Line 1 [%s]", line_1_buf);
+//	LOG_DBG("Line 2 [%s]", line_2_buf);
 	LCD_LOCATE(1,1);
 	LCD_printstring(line_1_buf);
 	LCD_LOCATE(2,1);
 	LCD_printstring(line_2_buf);
-	LOG_INF("End Draw title\r\n");
+	//LOG_INF("End Draw title\r\n");
 }
 
 static void split_num(uint16_t value, int8_t *array)
 {
 	int num = value, i;
 
-	LOG_DBG("Value : %d", value);
+	//LOG_DBG("Value : %d", value);
+	if(value == 0){
+		memset(array, 0, m_cfg.digit_num+1);
+		return ;
+	}
 	for(i = m_cfg.digit_num; i >= 0; i--){
 		array[i] = -1;  // init value
 		if(num){
 			array[i] = num%10;
-			LOG_DBG("Split num[%d] => %d", i, array[i]);
+			//LOG_DBG("Split num[%d] => %d", i, array[i]);
 			num/=10;
 		}
 	}
 }
 
-static uint16_t combine_array(int8_t *array)
+static int combine_array(int8_t *array)
 {
 	int i;
-	uint16_t value = 0;
+	int value = 0;
 	
 	for(i = 0; i <= m_cfg.digit_num; i++){
+		//LOG_DBG("%d:%d", i, array[i]);
 		if(array[i] >= 0){
 			value = (value*10)+array[i];
+			//LOG_DBG("Value[%d]", value);
 		}
 	}
 	
@@ -295,11 +303,17 @@ static uint16_t combine_array(int8_t *array)
 
 ScreenID_t channel_screen_func(Screen_param_t param)
 {
-	LOG_INF("Enter ch screen\r\n");
+	static uint8_t Info_Ch = 0xFF, Info_idx = 0;
+	uint8_t Info_list[]={eCH_OnTIME, eCH_DelayTIME, eCH_TriggerSet, eSEL_OPMODE};
+	//LOG_INF("Enter ch screen\r\n");
+
 	m_cfg.cursor = 0;
 	switch(param.key){
 		case eKey_Idle:
-			m_cfg.cur_ch = eCH1;
+		case eKey_ExitRemote:
+			if(m_cfg.cur_ch < eCH1 || m_cfg.cur_ch > eCH8){
+				m_cfg.cur_ch = eCH1;
+			}
 			break;
 		case eKey_Up:
 			m_cfg.cur_ch = (m_cfg.cur_ch + 1) % eCH_MAX;
@@ -307,11 +321,25 @@ ScreenID_t channel_screen_func(Screen_param_t param)
 		case eKey_Down:
 			m_cfg.cur_ch = (m_cfg.cur_ch - 1 + eCH_MAX) % eCH_MAX;
 			break;
+		case eKey_Enter:
+			if(Info_Ch != m_cfg.cur_ch){
+				Info_idx = 0;
+				Info_Ch = m_cfg.cur_ch;
+			}
+
+			draw_title(Info_list[Info_idx]);
+			Info_idx++;
+			if(Info_idx > 3){
+				Info_idx = 0;
+			}
+			return eMAX_SCREEN_ID;
 		case eKey_SetMode:
 			draw_title(eCH_OnTIME);
 			m_cfg.set_time = load_cfg.on_time[m_cfg.cur_ch];
 			m_cfg.cursor = 13;
 			m_cfg.digit_num = 4;  // 0 ~ 4
+			//m_cfg.set_mode =1;
+			//LOG_DBG("Delay Set Ch[%d] time[%d]", m_cfg.cur_ch, m_cfg.set_time);
 			split_num(m_cfg.set_time, m_cfg.input_num);			
 			LCD_LOCATE(2, m_cfg.cursor);
 			LCD_DISP_CURSOR();
@@ -321,7 +349,7 @@ ScreenID_t channel_screen_func(Screen_param_t param)
 	}
 	
 	draw_title(eCH_CHSelect);	
-	LOG_INF("Return ch scree function\r\n");
+	//LOG_INF("Return ch scree function\r\n");
 	return eMAX_SCREEN_ID;
 }
 
@@ -335,26 +363,55 @@ ScreenID_t set_changetime_func(Screen_param_t param)
 	BackEnd_Cmd_t cmd;
 	uint32_t set_time;
 	
+	//LOG_DBG("Cursor[%d] digit[%d] key[%s]", m_cfg.cursor, digit_idx, key_id_2_str(param.key));
 	switch(param.key){
 		case eKey_Up:
-			if(m_cfg.input_num[digit_idx]++ >= 9){
-				m_cfg.input_num[digit_idx] = 0;
+			if((m_cfg.input_num[0] == 5) && (digit_idx != 0)){
+				return ret_sc;
 			}
+			if(digit_idx == 0){
+				m_cfg.input_num[digit_idx]++;
+				if(m_cfg.input_num[digit_idx] > 5){
+					m_cfg.input_num[digit_idx] = 0;
+				}
+				memset(&m_cfg.input_num[1], 0, 4);
+			}else{
+				m_cfg.input_num[digit_idx]++;
+				if(m_cfg.input_num[digit_idx] > 9){
+					m_cfg.input_num[digit_idx] = 0;
+				}
+			}
+			//LOG_HEX_DUMP(m_cfg.input_num, 5, "Up");
 			change_value=1;
 			break;
-		case eKey_Down:			
-			if(m_cfg.input_num[digit_idx]-- <= 0){
-				m_cfg.input_num[digit_idx] = 9;
+		case eKey_Down:
+			if((m_cfg.input_num[0] == 5) && (digit_idx != 0)){
+				return ret_sc;
 			}
+			if(digit_idx == 0){
+				m_cfg.input_num[digit_idx]--;
+				if(m_cfg.input_num[digit_idx] < 0){
+					m_cfg.input_num[digit_idx] = 5;
+				}
+				memset(&m_cfg.input_num[1], 0, 4);
+			}else{
+				m_cfg.input_num[digit_idx]--;
+				if(m_cfg.input_num[digit_idx] < 0){
+					m_cfg.input_num[digit_idx] = 9;
+				}
+			}
+			//LOG_HEX_DUMP(m_cfg.input_num, 5, "Down");
 			change_value=1;
 			break;
 		case eKey_CursorUp:
-			if(m_cfg.cursor-- <= 9){
+			m_cfg.cursor--;
+			if(m_cfg.cursor < 9){
 				m_cfg.cursor = 13;
 			}
 			break;
 		case eKey_CursorDown:
-			if(m_cfg.cursor++ >= 13){
+			m_cfg.cursor++;
+			if(m_cfg.cursor > 13){
 				m_cfg.cursor = 9;
 			}		
 			break;
@@ -381,13 +438,13 @@ ScreenID_t set_changetime_func(Screen_param_t param)
 				m_cfg.set_time = load_cfg.delay_time[channel];
 				m_cfg.cursor = 13;
 				m_cfg.digit_num = 4;  // 0 ~ 4
-				split_num(m_cfg.set_time, m_cfg.input_num);			
+				//LOG_DBG("Delay Set Ch[%d] time[%d]", channel, m_cfg.set_time);
+				split_num(m_cfg.set_time, m_cfg.input_num);
+				//LOG_HEX_DUMP(m_cfg.input_num, m_cfg.digit_num, "Set delay");
 				LCD_LOCATE(2, m_cfg.cursor);
+				change_value = 1;
 			}else{
 				draw_title(eCH_TriggerSet);
-				m_cfg.enable_blink = 1;
-				m_cfg.blink_row = 2;
-				m_cfg.blink = 0;
 				ret_sc = eSET_TRIGGER_SC;
 				LCD_DISP_ON(); // Cursor off
 			}
@@ -395,15 +452,17 @@ ScreenID_t set_changetime_func(Screen_param_t param)
 	}
 
 	if(change_value){
-		LOG_DBG("Change Value Ch[%d] time[%d]", channel+1, combine_array(m_cfg.input_num));
+		//LOG_DBG("Change Value Ch[%d] time[%d]", channel+1, combine_array(m_cfg.input_num));
 		if(param.sc_id == eSET_ON_TIME_SC){
 			sprintf(line_1_buf, "CH%d On-Time     \n", channel+1);
 		}else{
 			sprintf(line_1_buf, "CH%d Delay-Time  \n", channel+1);
 		}
-		sprintf(line_2_buf, "Value : %05d us", combine_array(m_cfg.input_num));
+		sprintf(line_2_buf, "Value : %05d us\n", combine_array(m_cfg.input_num));
+		//LOG_DBG("Change Value[%s]", line_2_buf);
 		LCD_LOCATE(2,1);
 		LCD_printstring(line_2_buf);
+		LCD_LOCATE(2,m_cfg.cursor);
 	}
 	if(m_cfg.cursor != old_cursor){
 		LCD_LOCATE(2, m_cfg.cursor);
@@ -424,6 +483,7 @@ static ScreenID_t save_data(void)
 
 static void run_remote_mode(void)
 {
+	apps_set_remote_mode();
 	send_cmd_2_backend(eCMD_FR_SetRemote, 0, m_cfg.remote_mode);
 }
 
@@ -442,34 +502,53 @@ ScreenID_t blink_text_screen_func(Screen_param_t param)
 	switch(param.key){
 		case eKey_Up:
 		case eKey_Down:
-			old_value = ~old_value;
+			if(m_cfg.set_mode == 0){
+				return ret_sc;
+			}
+			old_value ^= 1;
 			if(ret_sc == eSET_TRIGGER_SC){
-				sprintf(m_cfg.blink_text[0], "Value : %s \n", old_value?"Falling":"Rising");
-				load_cfg.edge[m_cfg.cur_ch] = (old_value)?eFALLING:eRISING;
+				sprintf(m_cfg.blink_text[0], "Value : %s \n", (old_value==eFALLING)?"Falling":"Rising ");
+				load_cfg.edge[m_cfg.cur_ch] = (old_value==eFALLING)?eFALLING:eRISING;
 				cmd = eCMD_InputEdge;
 			}else{
-				sprintf(m_cfg.blink_text[0], "      %s     \n", (old_value)?"1 : 1" : "1 : N");
-				load_cfg.mode = (old_value)?eONE_ONE:eONE_N;
+				sprintf(m_cfg.blink_text[0], "      %s     \n", (old_value==eONE_ONE)?"1 : 1" : "1 : N");
+				load_cfg.mode = (old_value==eONE_ONE)?eONE_ONE:eONE_N;
 				cmd = eCMD_OutMode;
 			}
+			//LOG_DBG("old[%d] %s", old_value, m_cfg.blink_text[0]);
+			LCD_LOCATE(m_cfg.blink_row,1);
+			LCD_printstring(m_cfg.blink_text[0]);
 			break;			
 		case eKey_Enter:
-			m_cfg.enable_blink = 0;
-			send_cmd_2_backend(cmd, m_cfg.cur_ch, old_value);
-			ret_sc = save_data();
+			if(m_cfg.set_mode){
+				m_cfg.enable_blink = 0;
+				m_cfg.set_mode = 0;
+				apps_set_blink_enable(m_cfg.enable_blink);
+				ret_sc = save_data();
+				if(ret_sc != eMAX_SCREEN_ID){
+					return eERROR_SC;
+				}
+				send_cmd_2_backend(cmd, m_cfg.cur_ch, old_value);
+				draw_title(eCH_CHSelect);
+			}else{
+				ret_sc = eCHANNEL_SC;
+			}
 			break;
 		case eKey_SetMode:
 			if(ret_sc == eSET_TRIGGER_SC){
-				sprintf(m_cfg.blink_text[0], "Value : %s \n", (old_value)?"Rising":"Falling");
+				sprintf(m_cfg.blink_text[0], "Value : %s \n", (old_value==eRISING)?"Rising ":"Falling");
 				sprintf(m_cfg.blink_text[1], "Value :         \n");
 			}else{
-				sprintf(m_cfg.blink_text[0], "      %s     \n", (old_value)?"1 : N" : "1 : 1");
+				sprintf(m_cfg.blink_text[0], "      %s     \n", (old_value==eONE_N)?"1 : N" : "1 : 1");
 				sprintf(m_cfg.blink_text[1], "                \n");
 				draw_title(eSET_OPMODE);
 			}
 			m_cfg.blink = 0;
 			m_cfg.blink_row = 2;
 			m_cfg.enable_blink = 1;
+			m_cfg.set_mode = 1;
+
+			apps_set_blink_enable(m_cfg.enable_blink);
 			break;
 		case eKey_Mode:
 			if(ret_sc == eSET_TRIGGER_SC){
@@ -481,7 +560,7 @@ ScreenID_t blink_text_screen_func(Screen_param_t param)
 		default:
 			break;
 	}	
-	
+
 	return ret_sc;
 }
 
@@ -492,7 +571,7 @@ ScreenID_t uart_screen_func(Screen_param_t param)
 
 	switch(param.key){
 		case eKey_Up:
-			if(load_cfg.dev_id++ > MAX_DEV_ID){
+			if(load_cfg.dev_id++ >= MAX_DEV_ID){
 				load_cfg.dev_id = 1;
 			}			
 			break;
@@ -504,8 +583,13 @@ ScreenID_t uart_screen_func(Screen_param_t param)
 		case eKey_Enter:
 			if(m_cfg.set_mode){
 				LCD_DISP_ON();	// Cursor off
-				send_cmd_2_backend(eCMD_FR_SetDevID, 0, m_cfg.remote_mode);
+
 				ret_sc = save_data();
+				if(ret_sc == eERROR_SC){
+					return ret_sc;
+				}
+				send_cmd_2_backend(eCMD_FR_SetDevID, 0, m_cfg.remote_mode);
+				ret_sc = eETH_IP_SC;
 				m_cfg.set_mode = 0;
 			}else{
 				m_cfg.remote_mode = eREMOTE_RS232;
@@ -539,7 +623,7 @@ static void check_octet(uint8_t *check_value, uint8_t isUp)
 	uint16_t addr = combine_array((int8_t *)check_value);
 	uint8_t cur_digit = m_cfg.ip_digit;
 
-	LOG_DBG("isup[%d] Addr[%x] cur_dig[%d]", isUp, addr, cur_digit);
+	//LOG_DBG("isup[%d] Addr[%x] cur_dig[%d]", isUp, addr, cur_digit);
 
 	if(addr > 255){
 		if(cur_digit == 0){
@@ -548,7 +632,11 @@ static void check_octet(uint8_t *check_value, uint8_t isUp)
 			if(isUp){
 				check_value[cur_digit] = 0;
 			}else{ // 29x or 259
-				check_value[cur_digit] = 5;
+				if((cur_digit == 1) &&(check_value[2] > 5)){
+					check_value[cur_digit] = 4;
+				}else{
+					check_value[cur_digit] = 5;
+				}
 			}
 		}
 	}	
@@ -563,12 +651,20 @@ ScreenID_t ip_screen_func(Screen_param_t param)
 	uint8_t is_up = 0;
 	uint8_t old_cursor = m_cfg.cursor;
 	
+	//LOG_DBG("cursor[%d] digit[%d]", m_cfg.cursor, m_cfg.ip_idx);
 	switch(param.key){
 		case eKey_Up:
 		case eKey_Down:
+			if(m_cfg.set_mode == 0){
+				return ret_sc;
+			}
 			memcpy(temp_addr, m_cfg.ipaddr[m_cfg.ip_idx],3);
 			if(param.key == eKey_Up){
-				temp_addr[m_cfg.ip_digit]++;
+				if(temp_addr[m_cfg.ip_digit] == 9){
+					temp_addr[m_cfg.ip_digit] = 0;
+				}else{
+					temp_addr[m_cfg.ip_digit]++;
+				}
 				is_up = 1;
 			}else{
 				if(temp_addr[m_cfg.ip_digit] == 0){
@@ -579,15 +675,20 @@ ScreenID_t ip_screen_func(Screen_param_t param)
 			}
 			check_octet(temp_addr, is_up);
 			memcpy(m_cfg.ipaddr[m_cfg.ip_idx], temp_addr, 3);
-			sprintf(line_buf, "%03d.%03d.%03d.%03d ",	(uint8_t)combine_array(m_cfg.ipaddr[0]),
+			sprintf(line_buf, "%03d.%03d.%03d.%03d \n",	(uint8_t)combine_array(m_cfg.ipaddr[0]),
 														(uint8_t)combine_array(m_cfg.ipaddr[1]),
 														(uint8_t)combine_array(m_cfg.ipaddr[2]),
 														(uint8_t)combine_array(m_cfg.ipaddr[3]));
 			LCD_LOCATE(2,1);
 			LCD_printstring(line_buf);
+			LCD_LOCATE(2,m_cfg.cursor);
 			break;
 		case eKey_CursorUp:
-			if(m_cfg.cursor--<=0){
+			if(m_cfg.set_mode == 0){
+				return ret_sc;
+			}
+			m_cfg.cursor--;
+			if(m_cfg.cursor<=0){
 				m_cfg.cursor = 15;
 				m_cfg.ip_idx = 3;
 				m_cfg.ip_digit=2;
@@ -600,7 +701,11 @@ ScreenID_t ip_screen_func(Screen_param_t param)
 			}
 			break;
 		case eKey_CursorDown:
-			if(m_cfg.cursor++>=15){
+			if(m_cfg.set_mode == 0){
+				return ret_sc;
+			}
+			m_cfg.cursor++;
+			if(m_cfg.cursor>=15){
 				m_cfg.cursor = 1;
 				m_cfg.ip_idx = 0;
 				m_cfg.ip_digit =0;
@@ -620,6 +725,10 @@ ScreenID_t ip_screen_func(Screen_param_t param)
 				}
 				ret_sc = save_data();
 				m_cfg.set_mode = 0;
+				if(ret_sc == eERROR_SC){
+					return ret_sc;
+				}
+				ret_sc = eETH_PORT_SC;
 			}else{
 				//push_event0(EVT_Remote_Ether);
 				m_cfg.remote_mode = eREMOTE_ETHER;
@@ -654,47 +763,67 @@ ScreenID_t ip_screen_func(Screen_param_t param)
 	}
 	return ret_sc;
 }
+
 ScreenID_t port_screen_func(Screen_param_t param)
 {
-	ScreenID_t ret_sc = eMAX_SCREEN_ID;
+	ScreenID_t ret_sc = param.sc_id;
 	uint8_t old_cursor = m_cfg.cursor;
-	uint8_t temp_port[5];
+	int8_t temp_port[5];
 	char line_buf[LCD_PRINT_MAX];
+	int	new_port, direction = 1;
 	
 	switch(param.key){
 		case eKey_Up:
 		case eKey_Down:
-			memcpy(temp_port, m_cfg.port, 5);
-			if(param.key == eKey_Up){
-				if(temp_port[m_cfg.ip_digit] == 9){
-					temp_port[m_cfg.ip_digit] = 0;
-				}else{
-					temp_port[m_cfg.ip_digit]++;
-				}
-			}else{
-				if(temp_port[m_cfg.ip_digit] == 0){
-					temp_port[m_cfg.ip_digit] = 9;
-				}else{
-					temp_port[m_cfg.ip_digit]--;
-				}
+			if(m_cfg.set_mode == 0){
+				return ret_sc;
 			}
+			memcpy(temp_port, m_cfg.port, 5);
+
+			if(param.key == eKey_Up){
+				temp_port[m_cfg.ip_digit] = (temp_port[m_cfg.ip_digit]+1)%10;
+			}else{
+				temp_port[m_cfg.ip_digit] = (temp_port[m_cfg.ip_digit]-1+10)%10;
+				direction = -1;
+			}
+
+			new_port = combine_array(temp_port);
+//			LOG_DBG("New port[%05d] digit[%d] Value[%d]", new_port, m_cfg.ip_digit, temp_port[m_cfg.ip_digit]);
+			while((new_port < MIN_PORT)||(new_port > MAX_PORT)){
+				temp_port[m_cfg.ip_digit] = temp_port[m_cfg.ip_digit] + direction;
+				if(temp_port[m_cfg.ip_digit] > 9){
+					temp_port[m_cfg.ip_digit] = 0;
+				}else if(temp_port[m_cfg.ip_digit] < 0){
+					temp_port[m_cfg.ip_digit] = 9;
+				}
+				new_port = combine_array(temp_port);
+			}
+
 			memcpy(m_cfg.port, temp_port, 5);
-			sprintf(line_buf, "Port : %05d    ", combine_array(m_cfg.port));
+			sprintf(line_buf, "Port : %05d    \n", new_port);
 			LCD_LOCATE(2,1);
 			LCD_printstring(line_buf);
 			LCD_LOCATE(2,m_cfg.cursor);
 			break;
 		case eKey_CursorUp:
-			if(m_cfg.cursor--<=7){
-				m_cfg.cursor = 11;
+			if(m_cfg.set_mode == 0){
+				return ret_sc;
+			}
+			m_cfg.cursor--;
+			if(m_cfg.cursor<8){
+				m_cfg.cursor = 12;
 				m_cfg.ip_digit=4;
 			}else{
 				m_cfg.ip_digit--;
 			}
 			break;
 		case eKey_CursorDown:
-			if(m_cfg.cursor++>=11){
-				m_cfg.cursor = 7;
+			if(m_cfg.set_mode == 0){
+				return ret_sc;
+			}
+			m_cfg.cursor++;
+			if(m_cfg.cursor>12){
+				m_cfg.cursor = 8;
 				m_cfg.ip_digit =0;
 			}else{
 				m_cfg.ip_digit++;
@@ -705,24 +834,28 @@ ScreenID_t port_screen_func(Screen_param_t param)
 				LCD_DISP_ON();	// Cursor off
 				load_cfg.ether.port = combine_array(m_cfg.port);
 				ret_sc = save_data();
+				if(ret_sc == eERROR_SC){
+					return ret_sc;
+				}
 				m_cfg.set_mode = 0;
-			}else{
-				m_cfg.remote_mode = eREMOTE_ETHER;
-				ret_sc = eREMOTE_SC;
-				run_remote_mode();
 			}
+
+			m_cfg.remote_mode = eREMOTE_ETHER;
+			ret_sc = eREMOTE_SC;
+			run_remote_mode();
 			break;
 		case eKey_SetMode:
 			m_cfg.set_mode = 1;
-			m_cfg.cursor = 11;
-			m_cfg.digit_num = 5;
+			m_cfg.cursor = 12;
+			m_cfg.digit_num = 4;
 			m_cfg.ip_digit = 4;
 			split_num(load_cfg.ether.port, m_cfg.port);
 			LCD_LOCATE(2, m_cfg.cursor);
 			LCD_DISP_CURSOR();  // Cursor on		
-			draw_title(ePORT_Set);					
+			//draw_title(ePORT_Set);
 			break;
 		case eKey_Mode:
+		case eKey_Idle:
 			if(m_cfg.set_mode == 0){
 				draw_title(ePORT_Set);
 			}
@@ -752,7 +885,7 @@ ScreenID_t self_test_screen_func(Screen_param_t param)
 
 ScreenID_t remote_screen_func(Screen_param_t param)
 {
-	ScreenID_t ret_sc = eMAX_SCREEN_ID;
+	ScreenID_t ret_sc = param.sc_id;
 
 	switch(param.key){
 		case eKey_ExitRemote:
@@ -760,6 +893,7 @@ ScreenID_t remote_screen_func(Screen_param_t param)
 			ret_sc = eCHANNEL_SC;
 			break;
 		case eKey_Mode:
+		case eKey_Idle:
 			draw_title(eRemote_Mode);
 			break;
 	}
@@ -799,7 +933,7 @@ ScreenID_t user_screen_func(Screen_param_t param)
 			}else{
 				decreaseChar((char *)&load_cfg.company[m_cfg.cursor]);
 			}
-			sprintf(line_buf, "%s", load_cfg.company);
+			sprintf(line_buf, "%s\n", load_cfg.company);
 			LCD_LOCATE(1,1);
 			LCD_printstring(line_buf);
 			LCD_LOCATE(1,m_cfg.cursor);
@@ -835,11 +969,14 @@ ScreenID_t factory_screen_func(Screen_param_t param)
 	
 	switch(param.key){
 		case eKey_Enter:
+			send_cmd_2_backend(eCMD_Factory, 0, 0);
+			app_set_default_config();
+			memset(&m_cfg, 0, sizeof(m_cfg));
+			memcpy(&load_cfg, m_app_config, sizeof(config_t));
 			draw_title(eCH_CHSelect);
 			break;
 		case eKey_Factory:
 			draw_title(eFactor_Mode);
-			send_cmd_2_backend(eCMD_Factory, 0, 0);
 			break;
 	}
 	return ret_sc;
@@ -874,6 +1011,7 @@ ScreenID_t select_ch_screen_func(Screen_param_t param)
 			break;
 		case eKey_Enter:
 			m_cfg.enable_blink = 0;
+			apps_set_blink_enable(m_cfg.enable_blink);
 			load_cfg.ch_num = m_cfg.cursor ;
 			ret_sc = save_data();
 			m_cfg.set_mode = 0;
@@ -882,6 +1020,7 @@ ScreenID_t select_ch_screen_func(Screen_param_t param)
 			m_cfg.cursor = load_cfg.ch_num;
 			m_cfg.blink = 0;
 			m_cfg.enable_blink = 1;
+			apps_set_blink_enable(m_cfg.enable_blink);
 			select_ch_set_blink();
 			draw_title(eSEL_OP_Ch);
 			break;

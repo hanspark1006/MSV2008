@@ -73,6 +73,7 @@ void LCD_printchar(unsigned char ascode)
 
 void LCD_printstring(char *text)
 {
+	//LOG_DBG("Print String[%s]", text);
 	do
 	{
 		LCD_printchar(*text++);

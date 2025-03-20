@@ -1,4 +1,4 @@
-../Core/Src/config/app_config.c:33:13:set_default_config	1
-../Core/Src/config/app_config.c:39:6:app_config_init	2
-../Core/Src/config/app_config.c:48:5:app_save_config	1
-../Core/Src/config/app_config.c:53:9:app_read_config	2
+../Core/Src/config/app_config.c:33:6:app_set_default_config	1
+../Core/Src/config/app_config.c:42:6:app_config_init	2
+../Core/Src/config/app_config.c:51:5:app_save_config	1
+../Core/Src/config/app_config.c:56:9:app_read_config	2

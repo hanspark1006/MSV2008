@@ -44,4 +44,5 @@ enum{
 void app_config_init(void);
 int app_save_config(void);
 uint8_t app_read_config(config_t *pConfig);
+void app_set_default_config(void);
 #endif /* __APP_CONFIG_H */

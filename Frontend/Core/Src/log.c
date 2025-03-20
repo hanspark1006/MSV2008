@@ -79,10 +79,12 @@ const char *screen_id_2_str(int screen_id)
 		case_str(eETH_IP_SC)
 		case_str(eETH_PORT_SC)
 		case_str(eTESTMODE_SC)
+		case_str(eREMOTE_SC)
 		case_str(eUSERMODE_SC)
 		case_str(eFACTORY_SC)
 		case_str(eCHSELECT_SC)
 		case_str(eVERSION_SC)
+		case_str(eMAX_SCREEN_ID)
 		default:
 			break;
 	}

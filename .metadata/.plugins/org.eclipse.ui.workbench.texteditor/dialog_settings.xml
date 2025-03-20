@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section name="Workbench">
+	<item key="hasShownOverlayPopupBefore" value="true"/>
+	<item key="replaceBarOpen" value="false"/>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
-		<item key="selection" value="run_mode"/>
+		<item key="selection" value="remote_ctrl"/>
 		<item key="wrap" value="true"/>
 		<item key="casesensitive" value="false"/>
 		<item key="wholeword" value="false"/>
 		<item key="incremental" value="false"/>
 		<item key="isRegEx" value="false"/>
 		<list key="findhistory">
+			<item value="remote_ctrl"/>
+			<item value="blink_text_screen_func"/>
+			<item value="set_mode"/>
+			<item value="enable_blink"/>
+			<item value="combine_array"/>
+			<item value="eCH_DelayTIME"/>
+			<item value="eCH_CHSelect"/>
+			<item value="draw_title"/>
 			<item value="run_mode"/>
 			<item value="startRemoInit"/>
 			<item value="m_remote_eth_parser"/>
@@ -15,14 +25,6 @@
 			<item value="ipaddr"/>
 			<item value="remote_mode"/>
 			<item value="send_cmd_2_backend"/>
-			<item value="cur_ch"/>
-			<item value="eVer_Disp"/>
-			<item value="eSEL_OP_Ch"/>
-			<item value="enable_blink"/>
-			<item value="screen_blink"/>
-			<item value="blink"/>
-			<item value="LINE_CHARACTER_MAX"/>
-			<item value="run_remote_mode"/>
 		</list>
 		<list key="replacehistory">
 		</list>
