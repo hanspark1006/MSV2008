@@ -1,6 +1,6 @@
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
 #include "cmsis_os.h"
+#include "main.h"
 #include "lcd.h"
 
 /** @addtogroup STM8S_StdPeriph_Driver

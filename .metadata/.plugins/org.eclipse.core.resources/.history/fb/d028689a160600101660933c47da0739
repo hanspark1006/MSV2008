@@ -1,0 +1,343 @@
+/*
+ * apps.c
+ *
+ *  Created on: Feb 6, 2025
+ *      Author: catsa
+ */
+
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
+#include "cmsis_os.h"
+#include "screen.h"
+#include "apps.h"
+/* Private define ------------------------------------------------------------*/
+#define TIMER_100_MSEC		100
+#define TIMER_10_MSEC		10
+#define TIMER_20_MSEC		20
+#define TIMER_50_MSEC		50
+#define TIMER_70_MSEC		70
+#define TIMER_1_SEC			100
+#define TIMER_2_SEC			200
+#define TIMER_3_SEC			300
+#define TIMER_5_SEC			500
+
+#define MAX_SCREEN_STEP		6
+
+#define USE_KEY_TASK		1
+/* Private typedef -----------------------------------------------------------*/
+enum{
+	eBTN_PRESS,
+	eBTN_RELEASE
+};
+/* Private macro -------------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
+static struct{
+	ScreenID_t sc_id;
+	uint8_t list_idx;
+	uint8_t btn_status;
+	uint8_t setting_mode;
+	uint8_t mul_press;
+	uint8_t skip_press;
+	uint32_t key_tick;
+	uint8_t blink_enable;
+	uint16_t blink_tick;
+	uint8_t remote_ctrl;
+}m_cfg={
+	.sc_id = eCHANNEL_SC,
+	.btn_status = eBTN_RELEASE,
+	.setting_mode = 0,
+	.skip_press = 0,
+	.key_tick = 0,
+	.blink_enable = 0,
+	.blink_tick = 0,
+	.remote_ctrl = 0
+};
+osThreadId AppsTaskHandle;
+static uint8_t screen_list[MAX_SCREEN_STEP]={eCHANNEL_SC, eOPMODE_SC, eUARTMODE_SC, eETH_IP_SC, eETH_PORT_SC, eTESTMODE_SC};
+
+osTimerId btn_TimerHandle;
+
+extern osMessageQId keyQueueHandle;
+/* Private function prototypes -----------------------------------------------*/
+//static void AppsTask(void const * argument);
+/* Private functions ---------------------------------------------------------*/
+uint8_t key_check(void)
+{
+	uint8_t read_key = 0;
+
+	if(HAL_GPIO_ReadPin(ENTER_SW_GPIO_Port, ENTER_SW_Pin) == GPIO_PIN_RESET){
+		//LOG_INF("Enter\r\n");
+		read_key |= KEY_ENTER_PIN;
+	}
+	if(HAL_GPIO_ReadPin(UP_SW_GPIO_Port, UP_SW_Pin) == GPIO_PIN_RESET){
+		//LOG_INF("UP\r\n");
+		read_key |= KEY_UP_PIN;
+	}
+	if(HAL_GPIO_ReadPin(DOWN_SW_GPIO_Port, DOWN_SW_Pin) == GPIO_PIN_RESET){
+		//LOG_INF("DOWN\r\n");
+		read_key |= KEY_DOWN_PIN;
+	}
+	if(HAL_GPIO_ReadPin(MODE_SW_GPIO_Port, MODE_SW_Pin) == GPIO_PIN_RESET){
+		//LOG_INF("MODE\r\n");
+		read_key |= KEY_MODE_PIN;
+	}
+	return read_key;
+}
+
+static uint8_t proc_blink = 0;
+
+void btn_tmr_callback(void const *argument)
+{
+	if(m_cfg.btn_status == eBTN_PRESS){
+		m_cfg.key_tick++;
+	}
+
+	if(m_cfg.blink_enable){
+		m_cfg.blink_tick++;
+	}
+}
+
+void set_skip_key(void)
+{
+	m_cfg.key_tick = 0;
+	m_cfg.btn_status = eBTN_RELEASE;
+	m_cfg.skip_press = 1;
+	LOG_DBG("Set skip Key");
+}
+
+Key_t key_process(void)
+{
+	uint8_t read_key;
+	static Key_t multi_key=eKey_Idle, get_key = eKey_Idle,  old_key = eKey_Idle, release_old = eKey_Idle;
+	Key_t press_key = eKey_Idle;
+
+	read_key = key_check();
+	if(read_key & 0x0F){ // down key
+		LOG_DBG("Read key[%s] skip key[%d]", key_id_2_str(read_key), m_cfg.skip_press);
+		if(m_cfg.skip_press){
+			return press_key;
+		}
+		m_cfg.btn_status = eBTN_PRESS;
+		switch(read_key){
+			case KEY_CUR_UP_PIN:
+			case KEY_CUR_DOWN_PIN:
+			case KEY_FACTORY_PIN:
+			case KEY_USER_PIN:
+			case KEY_VERSION_PIN:
+			case KEY_CHSEL_PIN:
+				multi_key = read_key;
+				break;
+			default:
+				get_key = read_key;
+				break;
+		}
+		if(old_key != read_key){
+			//LOG_DBG("tick[%d] %s", m_cfg.key_tick, key_id_2_str(read_key));
+			old_key = read_key;
+		}
+		if(get_key == eKey_Mode){
+			if((m_cfg.setting_mode) && (m_cfg.key_tick > TIMER_50_MSEC)){
+				if(multi_key != eKey_Idle){
+					m_cfg.mul_press = 1;
+				}
+				press_key = multi_key;
+				multi_key = eKey_Idle;
+				m_cfg.key_tick = 0;
+			}else if(m_cfg.key_tick >= TIMER_2_SEC){
+				if((m_cfg.setting_mode == 0) && (m_cfg.remote_ctrl == 0)){
+					press_key = eKey_SetMode;
+					m_cfg.setting_mode = 1;
+					m_cfg.blink_tick = 0;
+				}else if(m_cfg.remote_ctrl){
+					press_key = eKey_ExitRemote;
+				}
+				//LOG_DBG("1.tick[%d] %s", m_cfg.key_tick, key_id_2_str(press_key));
+				set_skip_key();
+			}else{
+				return eKey_Idle;
+			}
+
+			return press_key;
+		}
+
+		if((multi_key!=eKey_Idle) && (m_cfg.key_tick > TIMER_5_SEC)){
+			press_key = multi_key;
+			multi_key = eKey_Idle;
+			//LOG_DBG("2.tick[%d] %s", m_cfg.key_tick, key_id_2_str(press_key));
+			set_skip_key();
+		}
+	}else{  // up key
+		if((get_key != eKey_Idle)&& (release_old != get_key)){
+			//LOG_DBG("Release[%s] tick[%d]", key_id_2_str(get_key), m_cfg.key_tick);
+			release_old = get_key;
+		}
+		m_cfg.btn_status = eBTN_RELEASE;
+		if((m_cfg.key_tick > TIMER_20_MSEC) && (m_cfg.key_tick < TIMER_50_MSEC)){
+			if(m_cfg.mul_press == 0){
+				press_key = get_key;
+				get_key = eKey_Idle;
+			}
+		}
+		old_key = eKey_Idle;
+		m_cfg.skip_press = 0;
+		m_cfg.key_tick = 0;
+		m_cfg.mul_press = 0;
+	}
+
+	return press_key;
+}
+
+void run_menu(Key_t input_key)
+{
+	ScreenID_t next_sc = eMAX_SCREEN_ID;
+
+	//LOG_DBG("Old SC[%d] Key[%x]", m_cfg.sc_id, input_key);
+	if(m_cfg.setting_mode == 0){
+		switch(input_key){
+			case eKey_Enter:
+				break;
+			case eKey_Mode:
+				if(++m_cfg.list_idx >= MAX_SCREEN_STEP){
+					m_cfg.list_idx = 0;
+				}
+				m_cfg.sc_id = screen_list[m_cfg.list_idx];
+				break;
+			case eKey_ChSel:
+				m_cfg.sc_id = eCHSELECT_SC;
+				break;
+			case eKey_Factory:
+				m_cfg.sc_id = eFACTORY_SC;
+				break;
+			case eKey_User:
+				m_cfg.sc_id = eUSERMODE_SC;
+				break;
+			case eKey_Version:
+				m_cfg.sc_id = eVERSION_SC;
+				break;
+			case eKey_ExitRemote:
+				m_cfg.sc_id = eCHANNEL_SC;
+				break;
+			default:
+				break;
+		}
+	}
+	//LOG_DBG("Change SC[%d]", m_cfg.sc_id);
+	//LOG_DBG("Setting mode[%d]", m_cfg.setting_mode);
+	next_sc = screen_process(m_cfg.sc_id, input_key);
+	if(next_sc < eMAX_SCREEN_ID ){
+		//LOG_INF("Next Sc[%s] Cur SC[%s]", screen_id_2_str(next_sc), screen_id_2_str(m_cfg.sc_id));
+		if(next_sc != m_cfg.sc_id){
+			m_cfg.sc_id = next_sc;
+			next_sc = screen_process(m_cfg.sc_id, eKey_Idle);
+			m_cfg.setting_mode = 0;
+			//LOG_ERR("Change screen clear setting mode");
+		}
+	}
+
+	//LOG_DBG("next Screen = %s[%d] setting mode[%d]", screen_id_2_str(next_sc), next_sc, m_cfg.setting_mode);
+	if(next_sc == eMAX_SCREEN_ID){
+		if(m_cfg.setting_mode || m_cfg.remote_ctrl){
+			//LOG_DBG("Release setting mode");
+			m_cfg.setting_mode = 0;
+			m_cfg.remote_ctrl = 0;
+			m_cfg.sc_id = eCHANNEL_SC;
+			m_cfg.list_idx = 0;
+		}
+	}
+}
+
+extern osThreadId ApplicationTaskHandle;
+extern osThreadId seriaTaskHandle;
+extern osThreadId KeyTaskHandle;
+void key_handler(void)
+{
+	Key_t read_key;
+
+	while(1){
+		read_key = key_process();
+		if(read_key != eKey_Idle){
+			osMessagePut(keyQueueHandle, read_key, osWaitForever);
+		}
+		osDelay(10);
+	}
+}
+
+//void AppsTask(void const * argument)
+void AppsTask(void)
+{
+	Key_t read_key;
+#if USE_KEY_TASK
+	osEvent evt;
+#endif
+
+	osTimerStart(btn_TimerHandle, (TIMER_10_MSEC));
+	m_cfg.btn_status = eBTN_PRESS;
+	while(1){
+		if(m_cfg.key_tick >= TIMER_3_SEC){
+			m_cfg.sc_id = eCHANNEL_SC;
+			screen_process(m_cfg.sc_id, eKey_Idle);
+			m_cfg.btn_status = eBTN_RELEASE;
+			m_cfg.key_tick = 0;
+			break;
+		}
+		osDelay(10);
+	}
+
+	while(1){
+#if USE_KEY_TASK
+		evt = osMessageGet(keyQueueHandle, osWaitForever);
+		if(evt.status == osEventMessage){
+			read_key = (Key_t)evt.value.v;
+#else
+		read_key = key_process();
+		if(read_key != eKey_Idle){
+#endif
+
+//			if(m_cfg.remote_ctrl){
+//				LOG_DBG("read key[%s]", key_id_2_str(read_key));
+//			}
+			if(m_cfg.remote_ctrl && (read_key != eKey_ExitRemote)){
+				osDelay(5);
+				continue;
+			}
+			run_menu(read_key);
+		}
+		if(m_cfg.blink_enable && (m_cfg.blink_tick >= TIMER_50_MSEC) && (proc_blink == 0)){
+			proc_blink = 1;
+			screen_blink();
+			m_cfg.blink_tick = 0;
+			proc_blink = 0;
+		}
+		osDelay(5);
+	}
+}
+
+void apps_set_remote_mode(void)
+{
+	LOG_DBG("Set remote mode");
+	m_cfg.remote_ctrl = 1;
+}
+
+void apps_set_blink_enable(uint8_t enable)
+{
+	m_cfg.blink_enable = enable;
+}
+
+int apps_init(void)
+{
+	osTimerDef(btn_Timer, btn_tmr_callback);
+	btn_TimerHandle = osTimerCreate(osTimer(btn_Timer), osTimerPeriodic, NULL);
+	if(btn_TimerHandle == NULL){
+		LOG_ERR("Front Key timer Create Error");
+		return -1;
+	}
+#if 0
+	osThreadDef(appsTask, AppsTask, osPriorityNormal, 0, 1024);
+	AppsTaskHandle = osThreadCreate(osThread(appsTask), NULL);
+	if(AppsTaskHandle == NULL){
+		LOG_ERR("Front Apps Task Create Error");
+		return -1;
+	}
+#endif
+	return 0;
+}

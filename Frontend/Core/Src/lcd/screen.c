@@ -170,7 +170,7 @@ ScreenID_t screen_process(ScreenID_t screen_id, Key_t key)
 	int i;	
 	Screen_param_t sc_param;
 
-	//LOG_INF("%s : key[%s] Set_mode[%d]", screen_id_2_str(screen_id), key_id_2_str(key), m_cfg.set_mode);
+	LOG_INF("%s : key[%s] Set_mode[%d]", screen_id_2_str(screen_id), key_id_2_str(key), m_cfg.set_mode);
 	sc_param.sc_id = screen_id;
 	sc_param.key = key;
 	for(i = 0; menu_list_size; i++){
@@ -187,7 +187,7 @@ static void draw_title(uint8_t step)
 	uint8_t ch = m_cfg.cur_ch;
 	uint8_t disp_ch = m_cfg.cur_ch+1;
 
-	//LOG_INF("start Draw title [%d] ch[%d]\r\n", step, ch);
+	LOG_INF("start Draw title [%d] ch[%d]\r\n", step, ch);
 
 	switch(step){
 		case eCH_CHSelect:
@@ -257,13 +257,13 @@ static void draw_title(uint8_t step)
 			sprintf(line_2_buf, "M - FW : Ver %1d.%1d\n", load_cfg.backendVer/10, load_cfg.backendVer%10);
 			break;
 	}
-//	LOG_DBG("Line 1 [%s]", line_1_buf);
-//	LOG_DBG("Line 2 [%s]", line_2_buf);
+	LOG_DBG("Line 1 [%s]", line_1_buf);
+	LOG_DBG("Line 2 [%s]", line_2_buf);
 	LCD_LOCATE(1,1);
 	LCD_printstring(line_1_buf);
 	LCD_LOCATE(2,1);
 	LCD_printstring(line_2_buf);
-	//LOG_INF("End Draw title\r\n");
+	LOG_INF("End Draw title\r\n");
 }
 
 static void split_num(uint16_t value, int8_t *array)
@@ -583,19 +583,16 @@ ScreenID_t uart_screen_func(Screen_param_t param)
 		case eKey_Enter:
 			if(m_cfg.set_mode){
 				LCD_DISP_ON();	// Cursor off
-
+				m_cfg.set_mode = 0;
 				ret_sc = save_data();
 				if(ret_sc == eERROR_SC){
 					return ret_sc;
 				}
 				send_cmd_2_backend(eCMD_FR_SetDevID, 0, m_cfg.remote_mode);
-				ret_sc = eETH_IP_SC;
-				m_cfg.set_mode = 0;
-			}else{
-				m_cfg.remote_mode = eREMOTE_RS232;
-				ret_sc = eREMOTE_SC;
-				run_remote_mode();
 			}
+			m_cfg.remote_mode = eREMOTE_RS232;
+			ret_sc = eREMOTE_SC;
+			run_remote_mode();
 			break;			
 		case eKey_SetMode:
 			m_cfg.set_mode = 1;
@@ -750,6 +747,7 @@ ScreenID_t ip_screen_func(Screen_param_t param)
 			draw_title(eIP_Set);			
 			break;
 		case eKey_Mode:
+		case eKey_Idle:
 			if(m_cfg.set_mode == 0){
 				draw_title(eIP_Set);
 			}
@@ -833,11 +831,11 @@ ScreenID_t port_screen_func(Screen_param_t param)
 			if(m_cfg.set_mode){
 				LCD_DISP_ON();	// Cursor off
 				load_cfg.ether.port = combine_array(m_cfg.port);
+				m_cfg.set_mode = 0;
 				ret_sc = save_data();
 				if(ret_sc == eERROR_SC){
 					return ret_sc;
 				}
-				m_cfg.set_mode = 0;
 			}
 
 			m_cfg.remote_mode = eREMOTE_ETHER;
@@ -921,7 +919,7 @@ static void decreaseChar(char *ch) {
 
 ScreenID_t user_screen_func(Screen_param_t param)
 {
-	ScreenID_t ret_sc = eMAX_SCREEN_ID;
+	ScreenID_t ret_sc = param.sc_id;
 	uint8_t old_cursor = m_cfg.cursor;
 	char line_buf[LCD_PRINT_MAX];
 
@@ -946,8 +944,11 @@ ScreenID_t user_screen_func(Screen_param_t param)
 			break;
 		case eKey_Enter:
 			LCD_DISP_ON();	// Cursor off
-			ret_sc = save_data();
 			m_cfg.set_mode = 0;
+			ret_sc = save_data();
+			if(ret_sc == eERROR_SC){
+				return ret_sc;
+			}
 			break;
 		case eKey_User:
 			m_cfg.set_mode = 1;
@@ -1000,7 +1001,7 @@ static void select_ch_set_blink(void)
 
 ScreenID_t select_ch_screen_func(Screen_param_t param)
 {
-	ScreenID_t ret_sc = eMAX_SCREEN_ID;
+	ScreenID_t ret_sc = param.sc_id;
 
 	switch(param.key){
 		case eKey_Up:
@@ -1013,13 +1014,17 @@ ScreenID_t select_ch_screen_func(Screen_param_t param)
 			m_cfg.enable_blink = 0;
 			apps_set_blink_enable(m_cfg.enable_blink);
 			load_cfg.ch_num = m_cfg.cursor ;
-			ret_sc = save_data();
 			m_cfg.set_mode = 0;
+			ret_sc = save_data();
+			if(ret_sc == eERROR_SC){
+				return ret_sc;
+			}
 			break;
 		case eKey_ChSel:
 			m_cfg.cursor = load_cfg.ch_num;
 			m_cfg.blink = 0;
 			m_cfg.enable_blink = 1;
+			m_cfg.set_mode = 1;
 			apps_set_blink_enable(m_cfg.enable_blink);
 			select_ch_set_blink();
 			draw_title(eSEL_OP_Ch);

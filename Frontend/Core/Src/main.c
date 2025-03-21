@@ -112,14 +112,15 @@ typedef  void (*pFunction)(void);
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-#if ENABLE_WATCHDOG
 IWDG_HandleTypeDef hiwdg;
-#endif
+
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
-osThreadId EventTaskHandle;
+osThreadId ApplicationTaskHandle;
 osThreadId seriaTaskHandle;
+osThreadId KeyTaskHandle;
+osMessageQId keyQueueHandle;
 osTimerId opLedTimerHandle;
 /* USER CODE BEGIN PV */
 
@@ -128,13 +129,12 @@ osTimerId opLedTimerHandle;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-#if ENABLE_WATCHDOG
 static void MX_IWDG_Init(void);
-#endif
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
-void eventTask(void const * argument);
+void applicationTask(void const * argument);
 void SerialTask(void const * argument);
+void keyProc(void const * argument);
 void opLedCb(void const * argument);
 
 /* USER CODE BEGIN PFP */
@@ -199,6 +199,10 @@ static int Init_device(void)
 
 	return 0;
 }
+
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
+    LOG_DBG("Stack Overflow in Task: %s\n", pcTaskName);
+}
 /* USER CODE END 0 */
 
 /**
@@ -230,9 +234,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-#if ENABLE_WATCHDOG
-  MX_IWDG_Init();
-#endif
+  //MX_IWDG_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
@@ -257,27 +259,40 @@ int main(void)
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
+  /* Create the queue(s) */
+  /* definition and creation of keyQueue */
+  osMessageQDef(keyQueue, 16, uint8_t);
+  keyQueueHandle = osMessageCreate(osMessageQ(keyQueue), NULL);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* definition and creation of EventTask */
-  osThreadDef(EventTask, eventTask, osPriorityNormal, 0, 512);
-  EventTaskHandle = osThreadCreate(osThread(EventTask), NULL);
+  /* definition and creation of ApplicationTask */
+  osThreadDef(ApplicationTask, applicationTask, osPriorityNormal, 0, 512);
+  ApplicationTaskHandle = osThreadCreate(osThread(ApplicationTask), NULL);
 
   /* definition and creation of seriaTask */
   osThreadDef(seriaTask, SerialTask, osPriorityIdle, 0, 128);
   seriaTaskHandle = osThreadCreate(osThread(seriaTask), NULL);
 
+  /* definition and creation of KeyTask */
+  osThreadDef(KeyTask, keyProc, osPriorityIdle, 0, 256);
+  KeyTaskHandle = osThreadCreate(osThread(KeyTask), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-  if(EventTaskHandle == NULL){
+  if(ApplicationTaskHandle == NULL){
 	  LOG_ERR("Event Task Create Error!!");
   }
   if(seriaTaskHandle == NULL){
 	  LOG_ERR("Serial Task Create Error!!");
   }
+  if(KeyTaskHandle == NULL){
+	  LOG_ERR("Key Task Create Error!!");
+  }
+
   /* USER CODE END RTOS_THREADS */
 
   /* Start scheduler */
@@ -335,7 +350,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
-#if ENABLE_WATCHDOG
+
 /**
   * @brief IWDG Initialization Function
   * @param None
@@ -363,7 +378,7 @@ static void MX_IWDG_Init(void)
   /* USER CODE END IWDG_Init 2 */
 
 }
-#endif
+
 /**
   * @brief USART1 Initialization Function
   * @param None
@@ -503,14 +518,14 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_eventTask */
+/* USER CODE BEGIN Header_applicationTask */
 /**
-  * @brief  Function implementing the EventTask thread.
+  * @brief  Function implementing the ApplicationTask thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_eventTask */
-void eventTask(void const * argument)
+/* USER CODE END Header_applicationTask */
+void applicationTask(void const * argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
@@ -524,6 +539,9 @@ void eventTask(void const * argument)
 
 	osTimerStart(opLedTimerHandle, OP_LED_TIMER_TICK);
   /* Infinite loop */
+//	while(1){
+//	osDelay(10);
+//	}
 	AppsTask();
   /* USER CODE END 5 */
 }
@@ -538,12 +556,39 @@ void eventTask(void const * argument)
 void SerialTask(void const * argument)
 {
   /* USER CODE BEGIN SerialTask */
+	LOG_DBG("Run Serial Task");
   /* Infinite loop */
   for(;;)
   {
 	  uart_task();
+	  //osDelay(10);
   }
   /* USER CODE END SerialTask */
+}
+
+/* USER CODE BEGIN Header_keyProc */
+/**
+* @brief Function implementing the KeyTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_keyProc */
+void keyProc(void const * argument)
+{
+  /* USER CODE BEGIN keyProc */
+	LOG_DBG("Run Key Task");
+//	UBaseType_t freeHeap = xPortGetFreeHeapSize();
+//  LOG_DBG("Free Heap Size: %lu\n", freeHeap);
+//
+//  UBaseType_t minHeap = xPortGetMinimumEverFreeHeapSize();
+//  LOG_DBG("Minimum Ever Free Heap Size: %lu bytes\n", minHeap);
+  /* Infinite loop */
+  for(;;)
+  {
+	  //osDelay(10);
+	  key_handler();
+  }
+  /* USER CODE END keyProc */
 }
 
 /* opLedCb function */
