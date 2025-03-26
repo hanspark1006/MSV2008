@@ -19,9 +19,9 @@ typedef struct _config_t{
 	uint8_t		mode;
 	uint8_t		dev_id;
 	uint8_t		ch_num;
-	uint16_t	on_time[MAX_CHANNEL];
-	uint16_t	delay_time[MAX_CHANNEL];
-	uint8_t		edge[MAX_CHANNEL];
+	uint16_t	on_time[MAX_CHANNEL+1];   // Add all channel + 1
+	uint16_t	delay_time[MAX_CHANNEL+1];
+	uint8_t		edge[MAX_CHANNEL+1];
 	ip_net_t	ether;
 	uint8_t		company[16]; // LINE_CHARACTER_MAX 16
 	uint8_t		frontVer;
@@ -32,6 +32,14 @@ typedef struct _config_t{
 /* Exported constants --------------------------------------------------------*/
 extern config_t	*m_app_config;
 /* Exported macro ------------------------------------------------------------*/
+enum{
+	e2CH_MODE = 0,
+	e4CH_MODE,
+	e6CH_MODE,
+	e8CH_MODE,
+	SEL_MAX_CH
+};
+
 enum{
 	eONE_ONE,
 	eONE_N

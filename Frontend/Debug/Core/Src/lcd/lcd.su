@@ -13,5 +13,5 @@
 ../Core/Src/lcd/lcd.c:115:6:LCD_DISP_OFF	8	static
 ../Core/Src/lcd/lcd.c:120:6:LCD_DISP_CURSOR	8	static
 ../Core/Src/lcd/lcd.c:125:6:LCD_LOCATE	16	static
-../Core/Src/lcd/lcd.c:143:6:LCD_printf	24	static
-../Core/Src/lcd/lcd.c:167:6:LCD_INIT	8	static
+../Core/Src/lcd/lcd.c:147:6:LCD_printf	24	static
+../Core/Src/lcd/lcd.c:171:6:LCD_INIT	8	static

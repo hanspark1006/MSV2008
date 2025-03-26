@@ -124,6 +124,10 @@ void LCD_DISP_CURSOR(void)
 
 void LCD_LOCATE(uint8_t row, uint8_t column)
 {
+	if(column == 0){
+		LOG_DBG("Check column number[%d], column");
+		column = 1;
+	}
 	column--;
 	switch (row)
 	{
