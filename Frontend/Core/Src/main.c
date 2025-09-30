@@ -97,7 +97,7 @@ typedef  void (*pFunction)(void);
 #define BUILD_MIN   ((BUILD_TIME_IS_BAD) ? 99 :  COMPUTE_BUILD_MIN)
 #define BUILD_SEC   ((BUILD_TIME_IS_BAD) ? 99 :  COMPUTE_BUILD_SEC)
 
-#define _VERSION_	"0.0.2"
+#define _VERSION_	"2.5.0"
 
 #define OP_LED_TIMER_TICK	500
 
@@ -129,7 +129,7 @@ osTimerId opLedTimerHandle;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_IWDG_Init(void);
+//static void MX_IWDG_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 void applicationTask(void const * argument);
@@ -195,6 +195,7 @@ static int Init_device(void)
 		if(apps_init()){
 			return -1;
 		}
+		trigger_init();
 	}while(0);
 
 	return 0;
@@ -274,7 +275,7 @@ int main(void)
   ApplicationTaskHandle = osThreadCreate(osThread(ApplicationTask), NULL);
 
   /* definition and creation of seriaTask */
-  osThreadDef(seriaTask, SerialTask, osPriorityIdle, 0, 128);
+  osThreadDef(seriaTask, SerialTask, osPriorityIdle, 0, 256);
   seriaTaskHandle = osThreadCreate(osThread(seriaTask), NULL);
 
   /* definition and creation of KeyTask */
@@ -356,28 +357,28 @@ void SystemClock_Config(void)
   * @param None
   * @retval None
   */
-static void MX_IWDG_Init(void)
-{
-
-  /* USER CODE BEGIN IWDG_Init 0 */
-
-  /* USER CODE END IWDG_Init 0 */
-
-  /* USER CODE BEGIN IWDG_Init 1 */
-
-  /* USER CODE END IWDG_Init 1 */
-  hiwdg.Instance = IWDG;
-  hiwdg.Init.Prescaler = IWDG_PRESCALER_16;
-  hiwdg.Init.Reload = 4095;
-  if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN IWDG_Init 2 */
-
-  /* USER CODE END IWDG_Init 2 */
-
-}
+//static void MX_IWDG_Init(void)
+//{
+//
+//  /* USER CODE BEGIN IWDG_Init 0 */
+//
+//  /* USER CODE END IWDG_Init 0 */
+//
+//  /* USER CODE BEGIN IWDG_Init 1 */
+//
+//  /* USER CODE END IWDG_Init 1 */
+//  hiwdg.Instance = IWDG;
+//  hiwdg.Init.Prescaler = IWDG_PRESCALER_16;
+//  hiwdg.Init.Reload = 4095;
+//  if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
+//  {
+//    Error_Handler();
+//  }
+//  /* USER CODE BEGIN IWDG_Init 2 */
+//
+//  /* USER CODE END IWDG_Init 2 */
+//
+//}
 
 /**
   * @brief USART1 Initialization Function

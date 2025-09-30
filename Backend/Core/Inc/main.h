@@ -47,6 +47,9 @@ extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 extern UART_HandleTypeDef huart6;
+
+extern I2C_HandleTypeDef hi2c1;
+extern SPI_HandleTypeDef hspi1;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -80,8 +83,12 @@ void Error_Handler(void);
 #define FPGA_RST_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-#define MCU_VERSION "V0.1"
-#define FPGA_VERSION "V1.0"
+#define MCU_VERSION			"V2.5"
+#define MCU_VERSION_NUM		25
+#define FPGA_VERSION		"V1.0"
+#define FPGA_VERSION_NUM	10
+
+#define USE_CFG_ETH_E2P		1
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

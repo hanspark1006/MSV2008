@@ -20,6 +20,8 @@
 #define MAX_FPGA_BUF		2048
 
 #define ALL_CH_VAL			8
+
+#define FGPA_ENABE_LOG		1
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private macro -------------------------------------------------------------*/
@@ -37,11 +39,13 @@ static struct{
 	uint8_t run_mode;
 	uint8_t trigger_buffer[MAX_PACKET_SIZE];
 	uint32_t last_out_channel;
+	uint16_t period_time;
 }m_cfg={
 	.run_trigger=0,
 	.run_mode = eREMOTE_NONE,
 	.trigger_buffer = {0,},
-	.last_out_channel = 0
+	.last_out_channel = 0,
+	.period_time = FREQ_140KHz
 };
 
 event_queue_observer_t fpga_event;
@@ -117,7 +121,10 @@ int fpga_set_output_channel(uint8_t outmode, uint32_t channel)
 		send_data.addr-=i;
 		send_data.data2 = Channel.channel_data[i*2];
 		send_data.data1 = Channel.channel_data[i*2+1];
+#if FGPA_ENABE_LOG
 		LOG_HEX_DUMP(&send_data, 4, "set output");
+#endif
+		LOG_DBG("Out Channel[%x]", channel);
 		error = m_serial_send(eFPGA_UART, (uint8_t*)&send_data, 4);
 		RETURN_IF_ERROR(error);
 	}
@@ -141,7 +148,9 @@ int fpga_set_input_channel(uint8_t outmode, uint32_t channel)
 		send_data.addr-=i;
 		send_data.data2 = Channel.channel_data[i*2];
 		send_data.data1 = Channel.channel_data[i*2+1];
+#if FGPA_ENABE_LOG
 		LOG_HEX_DUMP(&send_data, 4, "set input");
+#endif
 		error = m_serial_send(eFPGA_UART, (uint8_t*)&send_data, 4);
 		RETURN_IF_ERROR(error);
 	}
@@ -157,8 +166,9 @@ uint8_t fpga_set_mode(uint8_t mode)
 	send_data.addr = OPERATION_MODE_REG;
 	send_data.data1 = mode;
 	send_data.data2 = 0;
-
-	LOG_DBG("Set Mode : [%d]", mode);
+#if FGPA_ENABE_LOG
+	LOG_DBG("Set Mode : [%s]", mode?"Dimming":"Strobe");
+#endif
 	if(m_serial_send(eFPGA_UART, (uint8_t*)&send_data, 4) != HAL_OK){
 		return 1;
 	}
@@ -174,11 +184,12 @@ uint8_t fpga_select_output(uint8_t sel_output, uint8_t ex_type)
 	send_data.addr = INOUT_SELECT_REG;
 	send_data.data1 = sel_output;
 	send_data.data2 = 0;
-	if(sel_output == eONE_N){
+	if((sel_output == eONE_N) || (sel_output == eGROUP_SEQ) || (sel_output == eRESET_MODE)){
 		send_data.data2 = ex_type;
 	}
-
+#if FGPA_ENABE_LOG
 	LOG_HEX_DUMP(&send_data, 4, "set out mode");
+#endif
 	if(m_serial_send(eFPGA_UART, (uint8_t*)&send_data, 4) != HAL_OK){
 		return 1;
 	}
@@ -194,7 +205,9 @@ uint8_t fpga_select_edge(uint8_t sel_edge)
 	send_data.addr = TIGGER_INPUT_REG;
 	send_data.data1 = sel_edge;
 	send_data.data2 = 0;
-
+#if FGPA_ENABE_LOG
+	LOG_DBG("Edge:[%d]", sel_edge);
+#endif
 	if(m_serial_send(eFPGA_UART, (uint8_t*)&send_data, 4) != HAL_OK){
 		return 1;
 	}
@@ -222,8 +235,9 @@ int fpga_set_delay_time(uint8_t ch, uint16_t time)
 	fpga_data_t send_data;
 	uChtime set_time;
 	int err_code;
-
-	//LOG_DBG("CH[%d] Delay time[%d]", ch, time);
+#if FGPA_ENABE_LOG
+	LOG_DBG("CH[%d] Delay time[%d]", ch, time);
+#endif
 	set_time.u16_time = time;
 
 	send_data.header = WRITE_HEADER;
@@ -242,8 +256,9 @@ int fpga_set_on_time(uint8_t ch, uint16_t time)
 {
 	fpga_data_t send_data;
 	uChtime set_time;
-
-	//LOG_DBG("CH[%d] On time[%d]", ch, time);
+#if FGPA_ENABE_LOG
+	LOG_DBG("CH[%d] On time[%d]", ch, time);
+#endif
 	set_time.u16_time = time;
 
 	send_data.header = WRITE_HEADER;
@@ -262,14 +277,22 @@ int fpga_set_duty_time(uint8_t ch, uint16_t time)
 	fpga_data_t send_data;
 	uChtime set_time;
 
+#if FGPA_ENABE_LOG
+	LOG_DBG("Set duty time[%d]", time);
+#endif
 	set_time.u16_time = time;
 
 	send_data.header = WRITE_HEADER;
-	send_data.addr = CH1_DUTY_TIME_REG + ch;
+	//send_data.addr = CH1_DUTY_TIME_REG + ch;
 	send_data.data1 = set_time.array_time[1];
 	send_data.data2 = set_time.array_time[0];
-	if(m_serial_send(eFPGA_UART, (uint8_t*)&send_data, 4) != HAL_OK){
-		return -1;
+
+	//for(int i = 0; i < ch; i++)
+	{
+		send_data.addr = CH1_DUTY_TIME_REG + ch;
+		if(m_serial_send(eFPGA_UART, (uint8_t*)&send_data, 4) != HAL_OK){
+			return -1;
+		}
 	}
 
 	return 0;
@@ -280,15 +303,20 @@ int fpga_set_period_time(uint8_t ch, uint16_t time)
 	fpga_data_t send_data;
 	uChtime set_time;
 
+#if FGPA_ENABE_LOG
+	LOG_DBG("Set period time Ch[%d] [%x]", ch, time);
+#endif
 	set_time.u16_time = time;
 
 	send_data.header = WRITE_HEADER;
-	send_data.addr = CH1_PERIOD_TIME_REG + ch;
+	//send_data.addr = CH1_PERIOD_TIME_REG+ch;
 	send_data.data1 = set_time.array_time[1];
 	send_data.data2 = set_time.array_time[0];
-
-	if(m_serial_send(eFPGA_UART, (uint8_t*)&send_data, 4) != HAL_OK){
-		return -1;
+	for(int i = 0; i < ch; i++){
+		send_data.addr = CH1_PERIOD_TIME_REG+i;
+		if(m_serial_send(eFPGA_UART, (uint8_t*)&send_data, 4) != HAL_OK){
+			return -1;
+		}
 	}
 
 	return 0;
@@ -300,7 +328,9 @@ int fpga_set_trigger_order(uint8_t *ch_odder)
 
 	send_data.header = WRITE_HEADER;
 	for(int i = 0; i < MAX_CHANNEL; i+=2){
+#if FGPA_ENABE_LOG
 		LOG_DBG("Ch %d Odder[%d] Ch %d Odder[%d]", i+1, ch_odder[i], i+2, ch_odder[i+1]);
+#endif
 		if(ch_odder[i] > 0 || ch_odder[i+1] > 0){
 			send_data.data1 = ch_odder[i];
 			send_data.data2 = ch_odder[i+1];
@@ -315,6 +345,52 @@ int fpga_set_trigger_order(uint8_t *ch_odder)
 	return 0;
 }
 
+int fpga_set_Group_input(uint8_t gr_no, uint32_t channel)
+{
+	fpga_data_t send_data;
+	uChBit Channel;
+	int error;
+
+	Channel.channel_bit = channel;
+	send_data.header = WRITE_HEADER;
+	send_data.addr = N_N_G1_INPUT_L + (gr_no * 4);
+	for(int i = 0; i<2; i++){
+		send_data.addr-=i;
+		send_data.data2 = Channel.channel_data[i*2];
+		send_data.data1 = Channel.channel_data[i*2+1];
+#if FGPA_ENABE_LOG
+		LOG_HEX_DUMP(&send_data, 4, "set N:N input");
+#endif
+		error = m_serial_send(eFPGA_UART, (uint8_t*)&send_data, 4);
+		RETURN_IF_ERROR(error);
+	}
+
+	return 0;
+}
+
+int fpga_set_Group_output(uint8_t gr_no, uint32_t channel)
+{
+	fpga_data_t send_data;
+	uChBit Channel;
+	int error;
+
+	Channel.channel_bit = channel;
+	send_data.header = WRITE_HEADER;
+	send_data.addr = N_N_G1_OUTPUT_L + (gr_no * 4);
+	for(int i = 0; i<2; i++){
+		send_data.addr-=i;
+		send_data.data2 = Channel.channel_data[i*2];
+		send_data.data1 = Channel.channel_data[i*2+1];
+#if FGPA_ENABE_LOG
+		LOG_HEX_DUMP(&send_data, 4, "set N:N output");
+#endif
+		error = m_serial_send(eFPGA_UART, (uint8_t*)&send_data, 4);
+		RETURN_IF_ERROR(error);
+	}
+
+	return 0;
+}
+
 static void onTriggerCtrl(uint8_t ctrl)
 {
 	//LOG_DBG("Trigger %s", ctrl?"Start":"Stop");
@@ -324,7 +400,7 @@ static void onTriggerCtrl(uint8_t ctrl)
 static uint8_t parse_packet(uint8_t *pBuf)
 {
 	if(pBuf[0] == 0x33){
-		m_front_update_trigger_status(pBuf[1]);
+		m_front_update_trigger_status(pBuf[4]);
 		return 1;
 	}else if(pBuf[0] == 0xAA){
 		// response data
@@ -333,17 +409,23 @@ static uint8_t parse_packet(uint8_t *pBuf)
 	return 0;
 }
 
-void fpga_set_factory_reset(void)
+void fpga_set_factory_reset(uint8_t remote)
 {
 	int i;
-	uint8_t order[MAX_CHANNEL] = {0,};
+	uint8_t order[MAX_CHANNEL+1] = {0,};
+	uint32_t channel = 0;
 
-	fpga_select_output(eONE_ONE, 0);
-	fpga_select_edge(eTRIGGER_RISING);
-	for(i = 0; i < MAX_CHANNEL; i++){
+	LOG_INF("Set Factory Reset Max Ch[%d]", m_app_cfg->model.System.SelectChannel);
+
+	fpga_select_edge(eTRIGGER_FALLING);
+	for(i = 0; i < m_app_cfg->model.System.SelectChannel; i++){
 		fpga_set_on_time(i, 1000);
 		fpga_set_delay_time(i, 0);
+		fpga_set_duty_time(i, m_app_cfg->cfg.period_time[0]+1);
+		channel |= 1<<i;
+		LOG_DBG("%d Set channel : %x", i, channel);
 	}
+	LOG_DBG("1 Channel[%x]", channel);
 
 	for(i = 0; i < 3; i++){
 
@@ -352,8 +434,15 @@ void fpga_set_factory_reset(void)
 		order[(i*3)+2] = i+1;
 	}
 	fpga_set_trigger_order(order);
-	fpga_set_input_channel(0, 0x00000001);
-	fpga_set_output_channel(0, 0x00000000);
+	LOG_INF("Set Input All Channel");
+	fpga_set_input_channel(0, 0x000000ff);
+	if(remote){
+		fpga_set_output_channel(0, 0x00000000);
+	}else{
+		LOG_INF("Set Output Channel [%x]", channel);
+		fpga_set_output_channel(0, channel);
+	}
+	fpga_select_output(eONE_ONE, 0);
 }
 
 void fpga_get_trigger_status(uint8_t *pBuf)
@@ -401,9 +490,9 @@ static void FpgaProcTask(void const * argument)
 				cmd_buf[cmd_pos++] = ch;
 			}
 			if(cmd_pos == MAX_PACKET_SIZE){
-//				if(cmd_buf[1] != 0){
-//					LOG_HEX_DUMP(cmd_buf, 5, "RAW Trigger Data");
-//				}
+
+//				LOG_HEX_DUMP(cmd_buf, 5, "RAW Trigger Data");
+
 #if 0
 				if(m_cfg.run_mode == eREMOTE_NONE){
 					parse_packet(cmd_buf);
@@ -412,6 +501,7 @@ static void FpgaProcTask(void const * argument)
 				}
 #else
 				if(parse_packet(cmd_buf)){
+					//LOG_DBG("Run Mode[%d]", m_cfg.run_mode);
 					if((m_cfg.run_mode == eREMOTE_SERIAL) || (m_cfg.run_mode == eREMOTE_ETHER)){
 						status_timer_tick = 1;
 						if(m_cfg.run_mode == eREMOTE_SERIAL){
@@ -429,7 +519,7 @@ static void FpgaProcTask(void const * argument)
 		}else{
 			if((m_cfg.run_mode == eREMOTE_SERIAL) || (m_cfg.run_mode == eREMOTE_ETHER)){
 				if(status_timer_tick && (status_timer_tick++ > TRIGGER_TIME_OUT)){
-					LOG_DBG("Clear Trigger Status");
+					//LOG_DBG("Clear Trigger Status");
 					status_timer_tick = 0;
 					memset(cmd_buf, 0, MAX_PACKET_SIZE);
 					cmd_buf[0] =0x33;

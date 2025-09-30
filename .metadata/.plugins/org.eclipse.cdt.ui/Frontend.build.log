@@ -1,20 +1,10 @@
-10:25:26 **** Incremental Build of configuration Debug for project Frontend ****
+13:11:27 **** Build of configuration Debug for project Frontend ****
 make -j12 all 
-arm-none-eabi-gcc "../Core/Src/lcd/screen.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F103xB -c -I../Core/Inc -I"D:/project/yns/MSV2008/Frontend/Core/Src/apps" -I"D:/project/yns/MSV2008/Frontend/Core/Src/config" -I"D:/project/yns/MSV2008/Frontend/Core/Src/env" -I"D:/project/yns/MSV2008/Frontend/Core/Src/lcd" -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3 -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/lcd/screen.d" -MT"Core/Src/lcd/screen.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/lcd/screen.o"
-arm-none-eabi-gcc -o "Frontend.elf" @"objects.list"   -mcpu=cortex-m3 -T"D:\project\yns\MSV2008\Frontend\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Frontend.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-Finished building target: Frontend.elf
- 
 arm-none-eabi-size  Frontend.elf 
-arm-none-eabi-objdump -h -S Frontend.elf  > "Frontend.list"
    text	   data	    bss	    dec	    hex	filename
-  41132	    420	  15576	  57128	   df28	Frontend.elf
-arm-none-eabi-objcopy  -O ihex Frontend.elf  "Frontend.hex"
+  47692	    436	  15616	  63744	   f900	Frontend.elf
 Finished building: default.size.stdout
  
-Finished building: Frontend.list
-Finished building: Frontend.hex
- 
- 
 
-10:25:28 Build Finished. 0 errors, 0 warnings. (took 1s.961ms)
+13:11:29 Build Finished. 0 errors, 0 warnings. (took 2s.173ms)
 

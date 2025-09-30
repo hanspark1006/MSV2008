@@ -28,20 +28,20 @@
 		<item key="showEnclosingDefinitions" value="true"/>
 	</section>
 	<section name="TextSearchPage">
-		<item key="CASE_SENSITIVE" value="false"/>
+		<item key="CASE_SENSITIVE" value="true"/>
 		<item key="REG_EX_SEARCH" value="false"/>
-		<item key="WHOLE_WORD" value="false"/>
+		<item key="WHOLE_WORD" value="true"/>
 		<item key="SEARCH_DERIVED" value="false"/>
 		<item key="SEARCH_IN_BINARIES" value="false"/>
-		<item key="HISTORY_SIZE" value="9"/>
+		<item key="HISTORY_SIZE" value="12"/>
 		<section name="EXTENSIONS">
 			<item key="0" value="*"/>
 		</section>
 		<section name="HISTORY0">
-			<item key="ignoreCase" value="true"/>
+			<item key="ignoreCase" value="false"/>
 			<item key="isRegExSearch" value="false"/>
-			<item key="isWholeWord" value="false"/>
-			<item key="textPattern" value="EVT_self_test"/>
+			<item key="isWholeWord" value="true"/>
+			<item key="textPattern" value="fpga_set_period_time"/>
 			<item key="scope" value="0"/>
 			<list key="fileNamePatterns">
 				<item value="*"/>
@@ -50,10 +50,10 @@
 			</list>
 		</section>
 		<section name="HISTORY1">
-			<item key="ignoreCase" value="true"/>
+			<item key="ignoreCase" value="false"/>
 			<item key="isRegExSearch" value="false"/>
-			<item key="isWholeWord" value="false"/>
-			<item key="textPattern" value="EVT_remote_mode"/>
+			<item key="isWholeWord" value="true"/>
+			<item key="textPattern" value="frontVer"/>
 			<item key="scope" value="0"/>
 			<list key="fileNamePatterns">
 				<item value="*"/>
@@ -62,10 +62,10 @@
 			</list>
 		</section>
 		<section name="HISTORY2">
-			<item key="ignoreCase" value="true"/>
+			<item key="ignoreCase" value="false"/>
 			<item key="isRegExSearch" value="false"/>
-			<item key="isWholeWord" value="false"/>
-			<item key="textPattern" value="m_front_response"/>
+			<item key="isWholeWord" value="true"/>
+			<item key="textPattern" value="screen_sync_complete"/>
 			<item key="scope" value="0"/>
 			<list key="fileNamePatterns">
 				<item value="*"/>
@@ -74,10 +74,10 @@
 			</list>
 		</section>
 		<section name="HISTORY3">
-			<item key="ignoreCase" value="true"/>
+			<item key="ignoreCase" value="false"/>
 			<item key="isRegExSearch" value="false"/>
-			<item key="isWholeWord" value="false"/>
-			<item key="textPattern" value="RESPONSE_OK"/>
+			<item key="isWholeWord" value="true"/>
+			<item key="textPattern" value="backendVer"/>
 			<item key="scope" value="0"/>
 			<list key="fileNamePatterns">
 				<item value="*"/>
@@ -86,10 +86,10 @@
 			</list>
 		</section>
 		<section name="HISTORY4">
-			<item key="ignoreCase" value="true"/>
+			<item key="ignoreCase" value="false"/>
 			<item key="isRegExSearch" value="false"/>
-			<item key="isWholeWord" value="false"/>
-			<item key="textPattern" value="m_remote_eth_parser"/>
+			<item key="isWholeWord" value="true"/>
+			<item key="textPattern" value="EVT_start_trigger"/>
 			<item key="scope" value="0"/>
 			<list key="fileNamePatterns">
 				<item value="*"/>
@@ -98,10 +98,10 @@
 			</list>
 		</section>
 		<section name="HISTORY5">
-			<item key="ignoreCase" value="true"/>
+			<item key="ignoreCase" value="false"/>
 			<item key="isRegExSearch" value="false"/>
-			<item key="isWholeWord" value="false"/>
-			<item key="textPattern" value="screen_blink"/>
+			<item key="isWholeWord" value="true"/>
+			<item key="textPattern" value="fpga_set_mode"/>
 			<item key="scope" value="0"/>
 			<list key="fileNamePatterns">
 				<item value="*"/>
@@ -110,10 +110,10 @@
 			</list>
 		</section>
 		<section name="HISTORY6">
-			<item key="ignoreCase" value="true"/>
+			<item key="ignoreCase" value="false"/>
 			<item key="isRegExSearch" value="false"/>
-			<item key="isWholeWord" value="false"/>
-			<item key="textPattern" value="LCD_INIT"/>
+			<item key="isWholeWord" value="true"/>
+			<item key="textPattern" value="fpga_set_output_channel"/>
 			<item key="scope" value="0"/>
 			<list key="fileNamePatterns">
 				<item value="*"/>
@@ -122,10 +122,10 @@
 			</list>
 		</section>
 		<section name="HISTORY7">
-			<item key="ignoreCase" value="true"/>
+			<item key="ignoreCase" value="false"/>
 			<item key="isRegExSearch" value="false"/>
-			<item key="isWholeWord" value="false"/>
-			<item key="textPattern" value="EVT_trigger"/>
+			<item key="isWholeWord" value="true"/>
+			<item key="textPattern" value="fpga_set_factory_reset"/>
 			<item key="scope" value="0"/>
 			<list key="fileNamePatterns">
 				<item value="*"/>
@@ -134,10 +134,46 @@
 			</list>
 		</section>
 		<section name="HISTORY8">
-			<item key="ignoreCase" value="true"/>
+			<item key="ignoreCase" value="false"/>
 			<item key="isRegExSearch" value="false"/>
-			<item key="isWholeWord" value="false"/>
-			<item key="textPattern" value="MAX_DEV_ID"/>
+			<item key="isWholeWord" value="true"/>
+			<item key="textPattern" value="SelectChannel"/>
+			<item key="scope" value="0"/>
+			<list key="fileNamePatterns">
+				<item value="*"/>
+			</list>
+			<list key="workingSets">
+			</list>
+		</section>
+		<section name="HISTORY9">
+			<item key="ignoreCase" value="false"/>
+			<item key="isRegExSearch" value="false"/>
+			<item key="isWholeWord" value="true"/>
+			<item key="textPattern" value="fpga_set_duty_time"/>
+			<item key="scope" value="0"/>
+			<list key="fileNamePatterns">
+				<item value="*"/>
+			</list>
+			<list key="workingSets">
+			</list>
+		</section>
+		<section name="HISTORY10">
+			<item key="ignoreCase" value="false"/>
+			<item key="isRegExSearch" value="false"/>
+			<item key="isWholeWord" value="true"/>
+			<item key="textPattern" value="seq_grp"/>
+			<item key="scope" value="0"/>
+			<list key="fileNamePatterns">
+				<item value="*"/>
+			</list>
+			<list key="workingSets">
+			</list>
+		</section>
+		<section name="HISTORY11">
+			<item key="ignoreCase" value="false"/>
+			<item key="isRegExSearch" value="false"/>
+			<item key="isWholeWord" value="true"/>
+			<item key="textPattern" value="trigger"/>
 			<item key="scope" value="0"/>
 			<list key="fileNamePatterns">
 				<item value="*"/>

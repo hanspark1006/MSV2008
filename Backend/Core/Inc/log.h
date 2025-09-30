@@ -20,7 +20,7 @@
 
 void Printf(const char *fmt, ...);
 void dump_printf(const void *data, int size, const char* str);
-void Print_init(void);
+void Debug_Init(void);
 extern uint8_t log_level;
 
 #if defined(DEBUG)

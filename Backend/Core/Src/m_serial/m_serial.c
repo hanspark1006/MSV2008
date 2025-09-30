@@ -86,6 +86,9 @@ int m_serial_send(eUartDev dest, uint8_t *send_data, uint32_t len)
 //	if(dest ==eEXT_UART){
 //		LOG_HEX_DUMP(send_data, len, "Send PC Data");
 //	}
+//	if(dest == eFRONT_UART){
+//		LOG_HEX_DUMP(send_data, len, "Send Front Data");
+//	}
 	while(huart->gState != HAL_UART_STATE_READY){
 		osDelay(10);
 		if(timeout++ > 10){

@@ -45,7 +45,8 @@ Core/Src/apps/apps.o: ../Core/Src/apps/apps.c ../Core/Inc/main.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h \
  D:/project/yns/MSV2008/Frontend/Core/Src/lcd/screen.h \
  D:/project/yns/MSV2008/Frontend/Core/Src/apps/apps.h \
- ../Core/Src/apps/apps.h
+ ../Core/Src/apps/apps.h \
+ D:/project/yns/MSV2008/Frontend/Core/Src/config/app_config.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
@@ -95,3 +96,4 @@ Core/Src/apps/apps.o: ../Core/Src/apps/apps.c ../Core/Inc/main.h \
 D:/project/yns/MSV2008/Frontend/Core/Src/lcd/screen.h:
 D:/project/yns/MSV2008/Frontend/Core/Src/apps/apps.h:
 ../Core/Src/apps/apps.h:
+D:/project/yns/MSV2008/Frontend/Core/Src/config/app_config.h:

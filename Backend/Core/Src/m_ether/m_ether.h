@@ -12,18 +12,18 @@
 extern "C" {
 #endif
 /* Includes ------------------------------------------------------------------*/
-
+#include "m_remote.h"
 /* Exported types ------------------------------------------------------------*/
 typedef struct _ip_net_t
 {
 	uint8_t ipaddr[4];
-	uint8_t submask[4];
 	uint8_t gateway[4];
 	uint16_t port;
 }ip_net_t;
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions prototypes ---------------------------------------------*/
+void m_eth_set_prev_set_mode(remote_mode_t mode);
 void m_eth_set_trigger(uint8_t *response);
 int EthernetInit(void);
 /* Private defines -----------------------------------------------------------*/

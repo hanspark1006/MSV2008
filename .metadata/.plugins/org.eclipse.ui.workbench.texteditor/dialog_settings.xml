@@ -3,35 +3,35 @@
 	<item key="hasShownOverlayPopupBefore" value="true"/>
 	<item key="replaceBarOpen" value="false"/>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
-		<item key="selection" value="sel_max_ch"/>
+		<item key="selection" value="eCMD_SetOPMode"/>
 		<item key="wrap" value="true"/>
 		<item key="casesensitive" value="false"/>
 		<item key="wholeword" value="false"/>
 		<item key="incremental" value="false"/>
 		<item key="isRegEx" value="false"/>
 		<list key="findhistory">
-			<item value="sel_max_ch"/>
-			<item value="screen_process"/>
-			<item value="eCH_MAX"/>
-			<item value="blink_text"/>
-			<item value="eMAX_SCREEN_ID"/>
-			<item value="blink_row"/>
-			<item value="select_ch_set_blink"/>
-			<item value="key_tick"/>
-			<item value="MX_IWDG_Init"/>
+			<item value="eCMD_SetOPMode"/>
+			<item value="screen_sync_complete"/>
+			<item value="onTriggerCtrl"/>
+			<item value="run_trigger"/>
+			<item value="trigger_out_t"/>
+			<item value="fpga_set_Group_output"/>
+			<item value="SelectChannel"/>
+			<item value="last_out_channel"/>
+			<item value="channel"/>
+			<item value="ENABLE_WATCHDOG"/>
+			<item value="Set channe num"/>
+			<item value="eCMD_OutCh"/>
+			<item value="send_version"/>
 			<item value="remote_ctrl"/>
-			<item value="blink_text_screen_func"/>
-			<item value="set_mode"/>
-			<item value="enable_blink"/>
-			<item value="combine_array"/>
-			<item value="eCH_DelayTIME"/>
+			<item value="r_time"/>
 		</list>
 		<list key="replacehistory">
 		</list>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
-		<item key="DIALOG_X_ORIGIN" value="1005"/>
-		<item key="DIALOG_Y_ORIGIN" value="273"/>
+		<item key="DIALOG_X_ORIGIN" value="1161"/>
+		<item key="DIALOG_Y_ORIGIN" value="270"/>
 		<item key="DIALOG_WIDTH" value="322"/>
 		<item key="DIALOG_HEIGHT" value="391"/>
 		<item key="DIALOG_FONT_NAME" value="1|맑은 고딕|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|맑은 고딕"/>

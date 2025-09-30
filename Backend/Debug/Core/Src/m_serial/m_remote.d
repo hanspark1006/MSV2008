@@ -58,7 +58,9 @@ Core/Src/m_serial/m_remote.o: ../Core/Src/m_serial/m_remote.c \
  D:/project/yns/MSV2008/Backend/Core/Src/config/app_config_flash.h \
  D:/project/yns/MSV2008/Backend/Core/Src/m_serial/fpga_proc.h \
  ../Core/Src/m_serial/m_remote.h ../Core/Src/m_serial/fpga_proc.h \
- D:/project/yns/MSV2008/Backend/Core/Src/m_ether/m_ether.h
+ ../Core/Src/m_serial/m_front.h \
+ D:/project/yns/MSV2008/Backend/Core/Src/m_ether/m_ether.h \
+ D:/project/yns/MSV2008/Backend/Core/Src/m_serial/m_remote.h
 D:/project/yns/MSV2008/Backend/Core/Src/m_serial/m_serial.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
@@ -120,4 +122,6 @@ D:/project/yns/MSV2008/Backend/Core/Src/config/app_config_flash.h:
 D:/project/yns/MSV2008/Backend/Core/Src/m_serial/fpga_proc.h:
 ../Core/Src/m_serial/m_remote.h:
 ../Core/Src/m_serial/fpga_proc.h:
+../Core/Src/m_serial/m_front.h:
 D:/project/yns/MSV2008/Backend/Core/Src/m_ether/m_ether.h:
+D:/project/yns/MSV2008/Backend/Core/Src/m_serial/m_remote.h:

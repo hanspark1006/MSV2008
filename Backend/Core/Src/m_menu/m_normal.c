@@ -13,6 +13,7 @@
 #include "m_env.h"
 #include "m_serial.h"
 #include "m_remote.h"
+#include "m_ether.h"
 #include "app_state.h"
 #include "app_config.h"
 /* Private typedef -----------------------------------------------------------*/
@@ -91,24 +92,84 @@ static void onSaveConfg(void)
 
 static void onStartStrobe(uint8_t Mode)
 {
-	uint8_t out_mode = eSTROBE_MODE, option = 0;
+	uint8_t out_mode, option = 0;
 	uint32_t input = 0, output = 0;
-	uint16_t *pDelay, *pOn;
+	uint16_t *pDelay, *pOn, *pDuty;
 	int i;
 
-	fpga_set_mode(out_mode);
-	fpga_select_edge(m_app_state.config.trigger_edge);
+	osDelay(1000);
+	fpga_set_output_channel(0, 0);
+	fpga_set_input_channel(0, 0);
+	fpga_select_output(eRESET_MODE,0xFF);
 
+	//LOG_DBG("Mode state cfg[%d] config[%d]", m_app_state.config.mode, m_app_cfg->cfg.mode);
+//	if(m_app_state.config.mode == eSTROBE_MODE){
+//		fpga_set_mode(m_app_state.config.mode);
+//	}
+
+	LOG_DBG("Sel ch[%d] [%d]", m_app_cfg->model.System.SelectChannel, m_app_state.model.System.SelectChannel);
+	input = m_app_state.config.out_cfg.one_n.input;
+	output = m_app_state.config.out_cfg.one_n.output;
+	out_mode = m_app_state.config.out_mode;
+
+	pDuty = m_app_state.config.duty_time;
 	pDelay = m_app_state.config.delay_time;
 	pOn = m_app_state.config.on_time;
-	for(i = 0; i < MAX_CHANNEL; i++){
-		fpga_set_delay_time(i, pDelay[i]);
-		fpga_set_on_time(i, pOn[i]);
+	if(out_mode != eGROUP_SEQ){
+		for(i = 0; i < MAX_CHANNEL; i++){
+			fpga_set_delay_time(i, pDelay[i]);
+			fpga_set_on_time(i, pOn[i]);
+		}
 	}
-	//LOG_DBG("input[%x] output[%x] mode[%x]", input, output, out_mode);
 
+	switch(out_mode){
+		case eONE_N:
+			option = 1;
+			break;
+		case eONE_SEQ_N:
+			break;
+		case eGROUP_OUT:
+			for(i = 0; i < 4; i++){
+				fpga_set_Group_input(i, m_app_state.config.out_cfg.n_n_grp[i].input);
+				fpga_set_Group_output(i, m_app_state.config.out_cfg.n_n_grp[i].output);
+			}
+			break;
+		case eGROUP_SEQ:
+			{
+				uint8_t order[MAX_CHANNEL]={0,};
+
+				option = m_app_state.config.out_cfg.seq_grp.trigger_num;
+				for(i = 0; i < MAX_CHANNEL; i++){
+					order[i] = m_app_state.config.out_cfg.seq_grp.ch_data[i].order;
+					if(order[i] > 0){
+		//				LOG_DBG("Channel[%d] on[%d] delay[%d] odder[%d]",i,
+		//						m_app_state.config.out_cfg.seq_grp.ch_data[i].on,
+		//						m_app_state.config.out_cfg.seq_grp.ch_data[i].delay,
+		//						m_app_state.config.out_cfg.seq_grp.ch_data[i].order);
+						fpga_set_delay_time(i, pDelay[i]);
+						fpga_set_on_time(i, pOn[i]);
+					}
+				}
+				fpga_set_trigger_order(order);
+			}
+			break;
+	}
+	fpga_select_edge(m_app_state.config.trigger_edge);
 	fpga_set_input_channel(out_mode, input);
-#if 1	// Mode 진입시 동작 안하게 하는 루틴 Enter mode screen stop  - > run 20241029
+	fpga_set_mode(m_app_state.config.mode);
+	fpga_select_output(out_mode, option);
+	if(m_app_state.config.mode == eDIMMING_MODE){
+		fpga_set_period_time(m_app_cfg->model.System.SelectChannel, m_app_state.config.period_time[0]);
+		for(i = 0; i < MAX_CHANNEL; i++){
+			fpga_set_duty_time(i, pDuty[i]);
+		}
+	}
+
+	//fpga_set_input_channel(out_mode, 0);
+	LOG_INF("input[%x] output[%x] mode[%x]", input, output, out_mode);
+	fpga_set_input_channel(out_mode, input);
+
+#if 0	// Mode 진입시 동작 안하게 하는 루틴 Enter mode screen stop  - > run 20241029
 	if(Mode != eStrobe_Set){
 		fpga_set_output_channel(out_mode, output);
 	}else{
@@ -118,10 +179,7 @@ static void onStartStrobe(uint8_t Mode)
 	fpga_set_output_channel(out_mode, output);
 #endif
 
-	fpga_select_output(out_mode, option);
-
-	if(Mode == eStrobe_Set)
-		push_event1(EVT_fpga_load_done, eREMOTE_NONE);
+	push_event0(EVT_start_trigger);
 }
 
 static void onStartSelfTest(uint8_t isStart)
@@ -265,6 +323,13 @@ static void evt_handler(event_t const* evt, void* p_context)
 	{
 		case EVT_menu_start:
 			osTimerStart(measureTimerHandle,200); // 200msec
+			LOG_DBG("Check Remote mode[%d]", m_app_cfg->model.System.Remote_mode);
+			if((m_app_cfg->model.System.Remote_mode == eREMOTE_SERIAL) || (m_app_cfg->model.System.Remote_mode == eREMOTE_ETHER)){
+				//push_event1(EVT_remote_mode, m_app_cfg->model.System.Remote_mode);
+				m_remote_set_prev_mode(m_app_cfg->model.System.Remote_mode);
+				m_eth_set_prev_set_mode(m_app_cfg->model.System.Remote_mode);
+				onStartStrobe(eStrobe_run);
+			}
 			break;
 		case EVT_received_tcp:
 			onPushTcpData(evt->p_event_data, evt->event_data_size);

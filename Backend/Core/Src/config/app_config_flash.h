@@ -26,6 +26,7 @@ extern "C" {
 #pragma pack(1)
 typedef struct _modle_t
 {
+	uint8_t Remote_mode;
 	uint8_t SelectChannel;
 	uint8_t	MCU_FW_Ver[10];
 	uint8_t FPGA_FW_Ver[10];
@@ -34,9 +35,8 @@ typedef struct _modle_t
 typedef struct _model_ip_
 {
 	uint8_t ipaddr[4];
-	uint8_t submask[4];
+	uint8_t gateway[4];
 	uint16_t port;
-	uint8_t dev_name[16];
 }model_ip_net_t;
 
 typedef struct{
@@ -64,11 +64,12 @@ enum{
 
 enum{
 	eChannel_1,
-	eChannel_2,
-	eChannel_4,
-	eChannel_6,
-	eChannel_8
+	eChannel_2 = 2,
+	eChannel_4 = 4,
+	eChannel_6 = 6,
+	eChannel_8 = 8,
 };
+
 /* Exported functions prototypes ---------------------------------------------*/
 int app_config_flash_load_file_list(uint8_t file_list[][MAX_SAVE_NAME_LEN]);
 int app_config_flash_read_config(app_config_t *p_config, uint8_t file_idx);

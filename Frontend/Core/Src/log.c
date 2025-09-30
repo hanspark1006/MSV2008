@@ -74,7 +74,13 @@ const char *screen_id_2_str(int screen_id)
 		case_str(eSET_ON_TIME_SC)
 		case_str(eSET_DELAY_TIME_SC)
 		case_str(eSET_TRIGGER_SC)
+#if	ENABLE_DIMMING_MODE
+		case_str(eSET_LEVEL_SC)
+#endif
+		case_str(eOUTMODE_SC)
+#if	ENABLE_DIMMING_MODE
 		case_str(eOPMODE_SC)
+#endif
 		case_str(eUARTMODE_SC)
 		case_str(eETH_IP_SC)
 		case_str(eETH_PORT_SC)
@@ -100,7 +106,7 @@ const char *key_id_2_str(int key_id)
 		case_str(eKey_Up)
 		case_str(eKey_User)
 		case_str(eKey_Down)
-		case_str(eKey_Version)
+//		case_str(eKey_Version)
 		case_str(eKey_ChSel)
 		case_str(eKey_Mode)
 		case_str(eKey_Factory)

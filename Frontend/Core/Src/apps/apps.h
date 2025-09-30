@@ -14,9 +14,9 @@
 #define KEY_MODE_PIN		0x8
 #define KEY_CUR_UP_PIN		(KEY_MODE_PIN | KEY_UP_PIN)
 #define KEY_CUR_DOWN_PIN	(KEY_MODE_PIN | KEY_DOWN_PIN)
-#define KEY_FACTORY_PIN		(KEY_ENTER_PIN | KEY_MODE_PIN)
+#define KEY_FACTORY_PIN		(KEY_ENTER_PIN | KEY_DOWN_PIN)
 #define KEY_USER_PIN		(KEY_ENTER_PIN | KEY_UP_PIN)
-#define KEY_VERSION_PIN		(KEY_ENTER_PIN | KEY_DOWN_PIN)
+//#define KEY_VERSION_PIN		(KEY_ENTER_PIN | KEY_DOWN_PIN)
 #define KEY_CHSEL_PIN		(KEY_UP_PIN | KEY_DOWN_PIN)
 
 
@@ -26,10 +26,10 @@ typedef enum{
 	eKey_Up,
 	eKey_User = 0x03, 		// Enter + Up
 	eKey_Down = 0x04,
-	eKey_Version = 0x05, //Enter + Down
+//	eKey_Version = 0x05, //Enter + Down
+	eKey_Factory = 0x05, // Mode + Enter 5 sec
 	eKey_ChSel = 0x06, // Up+Down		5sec
 	eKey_Mode = 0x08,
-	eKey_Factory = 0x09, // Mode + Enter 5 sec
 	eKey_CursorUp = 0x0A, // Mode+Up 5sec
 	eKey_CursorDown = 0x0C, // Mode + Down
 	eKey_SetMode = 0x10,

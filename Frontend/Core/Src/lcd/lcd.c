@@ -22,6 +22,23 @@ static char Custom[48] =
 	0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, // 5columns |||||
 };
 /* Private function prototypes -----------------------------------------------*/
+static void DWT_Init(void)
+{
+    // DWT 활성화
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CYCCNT = 0;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+}
+
+static void delay_us(uint32_t us)
+{
+    uint32_t cycles_per_us = SystemCoreClock / 1000000;
+    uint32_t start_cycle = DWT->CYCCNT;
+    uint32_t delay_cycles = us * cycles_per_us;
+
+    while ((DWT->CYCCNT - start_cycle) < delay_cycles);
+}
+
 void LCD_LOAD_CGRAM(char tab[], uint8_t charnum)
 {
 	uint8_t index;
@@ -38,8 +55,9 @@ void LCD_LOAD_CGRAM(char tab[], uint8_t charnum)
 void LCD_ENABLE (void)
 {
 	HAL_GPIO_WritePin(LCD_EN_GPIO_Port, LCD_EN_Pin, GPIO_PIN_SET);
-	osDelay(2);
+	delay_us(1);
 	HAL_GPIO_WritePin(LCD_EN_GPIO_Port, LCD_EN_Pin, GPIO_PIN_RESET);
+	delay_us(100);
 }
 
 static void Send4Bit(uint8_t data)
@@ -58,7 +76,7 @@ void LCD_CMD(unsigned char cmd_data)
 	Send4Bit((cmd_data>>4)&0x0F);
 	Send4Bit(cmd_data & 0x0F);
 
-	osDelay(2);
+	delay_us(50);
 }
 
 void LCD_printchar(unsigned char ascode)
@@ -68,7 +86,7 @@ void LCD_printchar(unsigned char ascode)
 	Send4Bit((ascode>>4)&0x0F);
 	Send4Bit(ascode & 0x0F);
 
-	osDelay(2);
+	delay_us(50);
 }
 
 void LCD_printstring(char *text)
@@ -109,6 +127,7 @@ void LCD_RSHIFT(void)
 
 void LCD_DISP_ON(void)
 {
+	LOG_DBG("Display Cursor OFF!!");
 	LCD_CMD(0x0C);
 }
 
@@ -119,6 +138,7 @@ void LCD_DISP_OFF(void)
 
 void LCD_DISP_CURSOR(void)
 {
+	LOG_DBG("Display Cursor on!!");
 	LCD_CMD(0x0E); // Cursor ON / Blink ON
 }
 
@@ -166,10 +186,13 @@ void LCD_printf(const char *fmt, ...)
 			}
 		}
 	}
+	osDelay(1);
 }
 
 void LCD_INIT(void)
 {
+	DWT_Init();
+
 	HAL_GPIO_WritePin(LCD_EN_GPIO_Port, LCD_EN_Pin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(LCD_RS_GPIO_Port, LCD_RS_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(LCD_RW_GPIO_Port, LCD_RW_Pin, GPIO_PIN_RESET);

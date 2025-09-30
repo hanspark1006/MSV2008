@@ -37,7 +37,9 @@ Core/Src/config/app_config.o: ../Core/Src/config/app_config.c \
  D:/project/yns/MSV2008/Backend/Core/Src/m_event/macros_common.h \
  ../Core/Src/config/app_config.h ../Core/Src/config/app_config_flash.h \
  D:/project/yns/MSV2008/Backend/Core/Src/m_serial/fpga_proc.h \
- ../Core/Src/config/app_state.h
+ ../Core/Src/config/app_state.h \
+ D:/project/yns/MSV2008/Backend/Core/Src/m_serial/m_remote.h \
+ D:/project/yns/MSV2008/Backend/Core/Src/m_serial/fpga_proc.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -79,3 +81,5 @@ D:/project/yns/MSV2008/Backend/Core/Src/m_event/macros_common.h:
 ../Core/Src/config/app_config_flash.h:
 D:/project/yns/MSV2008/Backend/Core/Src/m_serial/fpga_proc.h:
 ../Core/Src/config/app_state.h:
+D:/project/yns/MSV2008/Backend/Core/Src/m_serial/m_remote.h:
+D:/project/yns/MSV2008/Backend/Core/Src/m_serial/fpga_proc.h:

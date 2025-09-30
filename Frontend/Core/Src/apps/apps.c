@@ -10,6 +10,7 @@
 #include "cmsis_os.h"
 #include "screen.h"
 #include "apps.h"
+#include "app_config.h"
 /* Private define ------------------------------------------------------------*/
 #define TIMER_100_MSEC		100
 #define TIMER_10_MSEC		10
@@ -21,7 +22,11 @@
 #define TIMER_3_SEC			300
 #define TIMER_5_SEC			500
 
+#if ENABLE_DIMMING_MODE
+#define MAX_SCREEN_STEP		6
+#else
 #define MAX_SCREEN_STEP		5
+#endif
 
 #define USE_KEY_TASK		1
 /* Private typedef -----------------------------------------------------------*/
@@ -55,8 +60,12 @@ static struct{
 	.user_setmode = 0
 };
 osThreadId AppsTaskHandle;
-static uint8_t screen_list[MAX_SCREEN_STEP]={eCHANNEL_SC, eOPMODE_SC, eUARTMODE_SC, eETH_IP_SC, eETH_PORT_SC/*, eTESTMODE_SC*/};
 
+#if	ENABLE_DIMMING_MODE
+static uint8_t screen_list[MAX_SCREEN_STEP]={eCHANNEL_SC, eOUTMODE_SC, eOPMODE_SC, eUARTMODE_SC, eETH_IP_SC, eETH_PORT_SC/*, eTESTMODE_SC*/};
+#else
+static uint8_t screen_list[MAX_SCREEN_STEP]={eCHANNEL_SC, eOUTMODE_SC, eUARTMODE_SC, eETH_IP_SC, eETH_PORT_SC/*, eTESTMODE_SC*/};
+#endif
 osTimerId btn_TimerHandle;
 
 extern osMessageQId keyQueueHandle;
@@ -115,7 +124,7 @@ Key_t key_process(void)
 
 	read_key = key_check();
 	if(read_key & 0x0F){ // down key
-		//LOG_DBG("Read key[%s] skip key[%d]", key_id_2_str(read_key), m_cfg.skip_press);
+		//LOG_DBG("Read key[%s] skip key[%d] key tick[%d]", key_id_2_str(read_key), m_cfg.skip_press,m_cfg.key_tick);
 		if(m_cfg.skip_press){
 			return press_key;
 		}
@@ -125,7 +134,7 @@ Key_t key_process(void)
 			case KEY_CUR_DOWN_PIN:
 			case KEY_FACTORY_PIN:
 			case KEY_USER_PIN:
-			case KEY_VERSION_PIN:
+//			case KEY_VERSION_PIN:
 			case KEY_CHSEL_PIN:
 				multi_key = read_key;
 				break;
@@ -134,11 +143,12 @@ Key_t key_process(void)
 				break;
 		}
 		if(old_key != read_key){
-			//LOG_DBG("tick[%d] %s", m_cfg.key_tick, key_id_2_str(read_key));
+			//LOG_DBG("tick[%d] %s setting mode:%d", m_cfg.key_tick, key_id_2_str(read_key), m_cfg.setting_mode);
 			old_key = read_key;
 		}
 		if(get_key == eKey_Mode){
 			if((m_cfg.setting_mode) && (m_cfg.key_tick > TIMER_50_MSEC)){
+				//LOG_DBG("Set mul key[%s]tick[%d]",key_id_2_str(read_key), m_cfg.key_tick);
 				if(multi_key != eKey_Idle){
 					m_cfg.mul_press = 1;
 				}
@@ -146,6 +156,7 @@ Key_t key_process(void)
 				multi_key = eKey_Idle;
 				m_cfg.key_tick = 0;
 			}else if(m_cfg.key_tick >= TIMER_2_SEC){
+				//LOG_DBG("Set mode[%d] or exit remote[%d]", m_cfg.setting_mode,m_cfg.remote_ctrl);
 				if((m_cfg.setting_mode == 0) && (m_cfg.remote_ctrl == 0)){
 					press_key = eKey_SetMode;
 					m_cfg.setting_mode = 1;
@@ -179,9 +190,13 @@ Key_t key_process(void)
 		m_cfg.btn_status = eBTN_RELEASE;
 		if((m_cfg.key_tick > TIMER_10_MSEC) && (m_cfg.key_tick < TIMER_50_MSEC)){
 			if(m_cfg.mul_press == 0){
+				//LOG_DBG("Release mulkey[%s]", key_id_2_str(get_key));
 				press_key = get_key;
 				get_key = eKey_Idle;
 			}
+		}
+		if(m_cfg.skip_press){
+			LOG_DBG("Release skip press");
 		}
 		old_key = eKey_Idle;
 		m_cfg.skip_press = 0;
@@ -196,7 +211,7 @@ void run_menu(Key_t input_key)
 {
 	ScreenID_t next_sc = eMAX_SCREEN_ID;
 
-//	LOG_DBG("Old SC[%d] Key[%x]", m_cfg.sc_id, input_key);
+	//LOG_DBG("Old SC[%d] Key[%s]", m_cfg.sc_id, key_id_2_str(input_key));
 	if(m_cfg.setting_mode == 0 && m_cfg.user_setmode == 0){
 		switch(input_key){
 			case eKey_Enter:
@@ -213,16 +228,17 @@ void run_menu(Key_t input_key)
 				break;
 			case eKey_Factory:
 				m_cfg.sc_id = eFACTORY_SC;
+				m_cfg.user_setmode = 1;
 				break;
 			case eKey_User:
 				m_cfg.sc_id = eUSERMODE_SC;
 				m_cfg.user_setmode = 1;
 				break;
-			case eKey_Version:
-				m_cfg.sc_id = eVERSION_SC;
-				break;
+//			case eKey_Version:
+//				m_cfg.sc_id = eVERSION_SC;
+//				break;
 			case eKey_ExitRemote:
-				m_cfg.sc_id = eCHANNEL_SC;
+				//m_cfg.sc_id = eCHANNEL_SC;
 				break;
 			default:
 				break;
@@ -232,19 +248,23 @@ void run_menu(Key_t input_key)
 //	LOG_DBG("Setting mode[%d]", m_cfg.setting_mode);
 	next_sc = screen_process(m_cfg.sc_id, input_key);
 	if(next_sc < eMAX_SCREEN_ID ){
-		//LOG_INF("Next Sc[%s] Cur SC[%s]", screen_id_2_str(next_sc), screen_id_2_str(m_cfg.sc_id));
+//		LOG_INF("Next Sc[%s][%d] Cur SC[%s][%d]", screen_id_2_str(next_sc), next_sc, screen_id_2_str(m_cfg.sc_id), m_cfg.sc_id);
 		if(next_sc != m_cfg.sc_id){
 			m_cfg.sc_id = next_sc;
 			next_sc = screen_process(m_cfg.sc_id, eKey_Idle);
-			m_cfg.setting_mode = 0;
-			//LOG_ERR("Change screen clear setting mode");
+			if((next_sc == eMAX_SCREEN_ID) || (next_sc == eCHANNEL_SC) || (next_sc == eREMOTE_SC)){
+				m_cfg.setting_mode = 0;
+//				LOG_DBG("Change screen clear setting mode next[%s][%d]", screen_id_2_str(next_sc), next_sc);
+			}else{
+//				LOG_DBG("Keep setting mode!! next sc[%s]", screen_id_2_str(next_sc));
+			}
 		}
 	}
 
-	//LOG_DBG("next Screen = %s[%d] setting mode[%d]", screen_id_2_str(next_sc), next_sc, m_cfg.setting_mode);
+//	LOG_DBG("next Screen = %s[%d] setting mode[%d]", screen_id_2_str(next_sc), next_sc, m_cfg.setting_mode);
 	if(next_sc == eMAX_SCREEN_ID){
 		if(m_cfg.setting_mode || m_cfg.remote_ctrl || m_cfg.user_setmode){
-			//LOG_DBG("Release setting mode");
+//			LOG_DBG("Release setting mode");
 			m_cfg.setting_mode = 0;
 			m_cfg.remote_ctrl = 0;
 			m_cfg.sc_id = eCHANNEL_SC;
@@ -287,9 +307,21 @@ void AppsTask(void)
 
 	osTimerStart(btn_TimerHandle, (TIMER_10_MSEC));
 	m_cfg.btn_status = eBTN_PRESS;
+
+	LOG_DBG("Start Task remote mode[%d]", m_app_config->remote_mode);
+	if(m_app_config->remote_mode == eREMOTE_NONE){
+		screen_send_config();
+	}
+
 	while(1){
 		if(m_cfg.key_tick >= TIMER_3_SEC){
-			m_cfg.sc_id = eCHANNEL_SC;
+			if(m_app_config->remote_mode == eREMOTE_NONE){
+				m_cfg.sc_id = eCHANNEL_SC;
+			}else{
+				m_cfg.sc_id = eREMOTE_SC;
+				m_cfg.remote_ctrl = 1;
+			}
+
 			screen_process(m_cfg.sc_id, eKey_Idle);
 			m_cfg.btn_status = eBTN_RELEASE;
 			m_cfg.key_tick = 0;
@@ -342,6 +374,7 @@ void apps_set_remote_mode(void)
 
 void apps_set_blink_enable(uint8_t enable)
 {
+	LOG_DBG("%s Blink", enable?"Enable":"Disable");
 	m_cfg.blink_enable = enable;
 }
 

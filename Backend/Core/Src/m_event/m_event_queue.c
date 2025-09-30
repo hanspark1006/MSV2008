@@ -33,6 +33,12 @@ int m_event_register(event_queue_observer_t *pEvent)
 	return 1;
 }
 
+//void monitor_heap(void)
+//{
+//    LOG_DBG("Heap free: %lu bytes\n", xPortGetFreeHeapSize());
+//    LOG_DBG("Heap min ever free: %lu bytes\n", xPortGetMinimumEverFreeHeapSize());
+//}
+
 int m_event_push(uint32_t evt, uint32_t param1, uint32_t param2, uint32_t param3, void* p_event_data, uint32_t event_data_size)
 {
 	int err;
@@ -64,7 +70,8 @@ int m_event_push(uint32_t evt, uint32_t param1, uint32_t param2, uint32_t param3
         memcpy(e->p_event_data, p_event_data, event_data_size);
     }
 
-    //LOG_DBG("Push evt[%d] [%s] e->p_event_data[%p] size[%d]", evt_cnt, event_type_2_str(e->event), e->p_event_data, e->event_data_size);
+//    LOG_DBG("Push evt[%d] [%s] e->p_event_data[%p] size[%d]", evt_cnt, event_type_2_str(e->event), e->p_event_data, e->event_data_size);
+//    monitor_heap();
     do
     {
         err = osMailPut(EventQ, e);
@@ -105,7 +112,7 @@ void m_event_dispatch(void)
         if (event.status == osEventMail){
         	e = event.value.p;
 
-		//LOG_INF("EVT : %s(%d) (%d,%d,%d)\r\n", event_type_2_str(e->event), e->event, e->param1, e->param2, e->param3);
+//		LOG_INF("EVT : %s(%d) (%d,%d,%d)\r\n", event_type_2_str(e->event), e->event, e->param1, e->param2, e->param3);
         for(int i = 0; i < evt_handle_cnt; i++){
 			//LOG_INF("Call Evt[%d]", i)
         	p_config = &g_Event_Handle[i];

@@ -105,6 +105,9 @@ void Error_Handler(void);
 /* USER CODE BEGIN Private defines */
 #define MAX_CHANNEL		8
 #define CMD_MAX_SIZE	10
+#define RECV_MAX_SIZE	8
+
+#define ENABLE_DIMMING_MODE	1
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

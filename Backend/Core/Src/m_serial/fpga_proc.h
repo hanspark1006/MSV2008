@@ -16,7 +16,7 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 #define MAX_OUTPUT_MODE		2
 #define MAX_CHANNEL			8
-
+#define MAX_IN_TRIGGER		8
 #define TRIGGER_TIME_OUT	20	// 2sec
 
 #pragma pack(push)
@@ -44,12 +44,27 @@ typedef struct{
 }channel_t;
 
 typedef struct{
+	uint8_t order;
+	uint16_t on;
+	uint16_t delay;
+}trigger_order_t;
+
+typedef struct{
+	uint8_t			trigger_num;
+	channel_t		channel;
+	trigger_order_t	ch_data[MAX_CHANNEL];
+}oneByGrpSeq;
+
+typedef struct{
 	channel_t	one_n;
+	channel_t	one_seq;
+	oneByGrpSeq	seq_grp;
+	channel_t	n_n_grp[4];
 }out_config_t;
 
 typedef struct
 {
-	uint8_t 		mode; // strobe only
+	uint8_t 		mode;  // 0 : Strobe   1: Dimming
 	uint8_t			out_mode;
 	out_config_t	out_cfg;
 	uint8_t			trigger_edge;
@@ -77,9 +92,11 @@ int fpga_set_on_time(uint8_t ch, uint16_t time);
 int fpga_set_duty_time(uint8_t ch, uint16_t time);
 int fpga_set_period_time(uint8_t ch, uint16_t time);
 int fpga_set_trigger_order(uint8_t *ch_order);
-void fpga_set_factory_reset(void);
+void fpga_set_factory_reset(uint8_t remote);
 void fpga_get_trigger_status(uint8_t *pBuf);
 void fpga_set_last_output_channel(void);
+int fpga_set_Group_output(uint8_t gr_no, uint32_t channel);
+int fpga_set_Group_input(uint8_t gr_no, uint32_t channel);
 /* Private defines -----------------------------------------------------------*/
 #define WRITE_HEADER		0x55
 #define READ_HEADER			0xAA
@@ -101,6 +118,10 @@ enum{
 enum{
 	eONE_ONE,
 	eONE_N,
+	eONE_SEQ_N,
+	eGROUP_OUT,
+	eGROUP_SEQ,
+	eRESET_MODE=0xFF
 };
 
 #define TIGGER_INPUT_REG	0x07
@@ -259,6 +280,23 @@ enum{
 #define CH_27_28_TRIGGER_ORDER_REG	0x9D
 #define CH_29_30_TRIGGER_ORDER_REG	0x9E
 #define CH_31_32_TRIGGER_ORDER_REG	0x9F
+
+#define N_N_G1_INPUT_H				0xA0
+#define N_N_G1_INPUT_L				0xA1
+#define N_N_G1_OUTPUT_H				0xA2
+#define N_N_G1_OUTPUT_L				0xA3
+#define N_N_G2_INPUT_H				0xA4
+#define N_N_G2_INPUT_L				0xA5
+#define N_N_G2_OUTPUT_H				0xA6
+#define N_N_G2_OUTPUT_L				0xA7
+#define N_N_G3_INPUT_H				0xA8
+#define N_N_G3_INPUT_L				0xA9
+#define N_N_G3_OUTPUT_H				0xAA
+#define N_N_G3_OUTPUT_L				0xAB
+#define N_N_G4_INPUT_H				0xAC
+#define N_N_G4_INPUT_L				0xAD
+#define N_N_G4_OUTPUT_H				0xAE
+#define N_N_G4_OUTPUT_L				0xAF
 
 #ifdef __cplusplus
 }

@@ -13,12 +13,20 @@
 #define REMOTE_HEADER	0xEF
 #define REMOTE_TAIL		0xFEFF
 #define RESPONSE_HEADER	0xDF
+#define FREQ_140KHz		140
 
 typedef struct _remote_time{
 	uint16_t	on_time[MAX_CHANNEL];
 	uint16_t	delay_time[MAX_CHANNEL];
 }Remote_Time_t;
 
+enum{
+	OUTMODE_1_1 = 0x00,
+	OUTMODE_1_N,
+	OUTMODE_1_N_SEQ,
+	OUTMODE_GRP_OUT,
+	OUTMODE_GRP_SEQ,
+};
 enum{
 	eCOMMAND_CON_CMD = 0xA0,
 
@@ -34,11 +42,17 @@ enum{
 	eCOMMAND_FACTORY_RESET,
 	eCOMMAND_REMOTE_IP_STATUS,
 	eCOMMAND_CLOSE_REMOTE,
+	eCOMMAND_SETOPMODE,
+	eCOMMAND_SETDUTY,
+	eCOMMAND_SETPERIOD,
+
+	eCOMMAND_SET_GR_IN = 0xC0,
+	eCOMMAND_SET_GR_OUT = 0xC1,
 
 	eRESPONSE_OK = 0xD0,
 	eRESPONSE_ERROR,
 	eRESPONSE_CON_DONE,
-	eRESPONSE_RDY_LOAD_DONE
+	eRESPONSE_RDY_LOAD_DONE,
 };
 
 typedef enum {
@@ -49,6 +63,7 @@ typedef enum {
 	eREMOTE_CLOSE
 }remote_mode_t;
 
+void m_remote_set_prev_mode(remote_mode_t mode);
 uint8_t m_remote_front_parser(uint8_t *recv_buf, uint16_t size);
 uint8_t m_remote_eth_parser(uint8_t *recv_buf, uint16_t size);
 void m_remote_response(uint8_t *data);

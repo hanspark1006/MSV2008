@@ -56,6 +56,7 @@ Core/Src/m_serial/m_serial.o: ../Core/Src/m_serial/m_serial.c \
  D:/project/yns/MSV2008/Backend/Core/Src/m_menu/m_normal.h \
  ../Core/Src/m_serial/fpga_proc.h ../Core/Src/m_serial/m_remote.h \
  D:/project/yns/MSV2008/Backend/Core/Src/m_ether/m_ether.h \
+ D:/project/yns/MSV2008/Backend/Core/Src/m_serial/m_remote.h \
  ../Core/Src/m_serial/m_front.h ../Core/Src/m_serial/m_serial.h
 D:/project/yns/MSV2008/Backend/Core/Src/m_serial/m_serial.h:
 ../Core/Inc/main.h:
@@ -116,5 +117,6 @@ D:/project/yns/MSV2008/Backend/Core/Src/m_menu/m_normal.h:
 ../Core/Src/m_serial/fpga_proc.h:
 ../Core/Src/m_serial/m_remote.h:
 D:/project/yns/MSV2008/Backend/Core/Src/m_ether/m_ether.h:
+D:/project/yns/MSV2008/Backend/Core/Src/m_serial/m_remote.h:
 ../Core/Src/m_serial/m_front.h:
 ../Core/Src/m_serial/m_serial.h:

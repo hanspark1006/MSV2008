@@ -28,6 +28,7 @@
 #include "m_serial.h"
 #include "app_config.h"
 #include "app_state.h"
+#include "m_front.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -207,9 +208,12 @@ int Initialize(void)
 
 		err_no = EthernetInit();
 		BREAK_IF_ERROR(err_no);
+
+		err_no = m_front_init();
+		BREAK_IF_ERROR(err_no);
 	}while(0);
 
-	return errno;
+	return err_no;
 }
 /* USER CODE END 0 */
 
@@ -400,7 +404,7 @@ static void MX_IWDG_Init(void)
   /* USER CODE END IWDG_Init 0 */
 
   /* USER CODE BEGIN IWDG_Init 1 */
-
+	// 1.8sec refresh..
   /* USER CODE END IWDG_Init 1 */
   hiwdg.Instance = IWDG;
   hiwdg.Init.Prescaler = IWDG_PRESCALER_16;
@@ -469,7 +473,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
+  huart1.Init.BaudRate = 9600;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -609,7 +613,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(ETH_NSS_GPIO_Port, ETH_NSS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(FPGA_RST_GPIO_Port, FPGA_RST_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pins : OPLED_Pin STATUS_LED_Pin */
   GPIO_InitStruct.Pin = OPLED_Pin|STATUS_LED_Pin;
@@ -694,7 +698,8 @@ void eventTask(void const * argument)
 void optimerCb(void const * argument)
 {
   /* USER CODE BEGIN optimerCb */
-
+	//LOG_DBG("Watch feed..");
+	HAL_IWDG_Refresh(&hiwdg);
   /* USER CODE END optimerCb */
 }
 

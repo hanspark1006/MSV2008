@@ -54,7 +54,10 @@ Core/Src/m_serial/m_front.o: ../Core/Src/m_serial/m_front.c \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h \
  D:/project/yns/MSV2008/Backend/Core/Src/m_menu/m_normal.h \
  ../Core/Src/m_serial/m_remote.h ../Core/Src/m_serial/fpga_proc.h \
- ../Core/Src/m_serial/m_front.h ../Core/Src/m_serial/m_serial.h
+ ../Core/Src/m_serial/m_front.h ../Core/Src/m_serial/m_serial.h \
+ D:/project/yns/MSV2008/Backend/Core/Src/config/app_config.h \
+ D:/project/yns/MSV2008/Backend/Core/Src/config/app_config_flash.h \
+ D:/project/yns/MSV2008/Backend/Core/Src/m_serial/fpga_proc.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -114,3 +117,6 @@ D:/project/yns/MSV2008/Backend/Core/Src/m_menu/m_normal.h:
 ../Core/Src/m_serial/fpga_proc.h:
 ../Core/Src/m_serial/m_front.h:
 ../Core/Src/m_serial/m_serial.h:
+D:/project/yns/MSV2008/Backend/Core/Src/config/app_config.h:
+D:/project/yns/MSV2008/Backend/Core/Src/config/app_config_flash.h:
+D:/project/yns/MSV2008/Backend/Core/Src/m_serial/fpga_proc.h:

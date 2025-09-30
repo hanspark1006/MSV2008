@@ -1,2 +1,4 @@
-../Core/Src/env/trigger.c:41:6:trigger_init	2
-../Core/Src/env/trigger.c:48:6:trigger_set	5
+../Core/Src/env/trigger.c:48:6:trigger_init	3
+../Core/Src/env/trigger.c:65:6:trigger_tmr_callback	4
+../Core/Src/env/trigger.c:78:6:trigger_set_channel	2
+../Core/Src/env/trigger.c:90:6:trigger_set	6

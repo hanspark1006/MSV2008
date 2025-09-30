@@ -11,6 +11,6 @@
 /* Exported functions ------------------------------------------------------- */
 int uart_init(void);
 void uart_task(void);
-int uart_SendFront(uint8_t cmd, uint8_t ch, uint32_t data);
+int uart_SendFront(uint8_t cmd, uint8_t ch, uint8_t *data);
 
 #endif /* __UART_H */

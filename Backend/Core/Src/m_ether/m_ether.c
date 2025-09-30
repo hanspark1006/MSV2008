@@ -9,17 +9,23 @@
 #include "cmsis_os.h"
 
 #include "m_env.h"
-#include "m_ether.h"
 #include "m_serial.h"
-#include "m_remote.h"
-#include "app_config_flash.h"
+#include "m_ether.h"
+#include "app_config.h"
 #include "Ethernet.h"
 /* Private typedef -----------------------------------------------------------*/
+#if (USE_CFG_ETH_E2P == 0)
 typedef struct _mac_ip_addr
 {
 	char id[2];
 	ip_net_t ip_net;
 }mac_ip_addr;
+#else
+typedef struct _mac_ip_addr
+{
+	ip_net_t ip_net;
+}mac_ip_addr;
+#endif
 
 typedef enum{
 	eREPLY_OK,
@@ -35,20 +41,18 @@ static struct{
 #define  DEC2BCD(v) (((v/10)<<4) + (v%10));
 #define  BCD2DEC(v) ((v>>4)*10 + (v&0x0F));
 
+#if (USE_CFG_ETH_E2P == 0)
 #define AT24EEP_ADDR		0xA0
+#endif
+#define MAC_I2C_HANDLE		hi2c1
 #define AT24MAC_ADDR		0xB0
 #define EUI48_ADDR			0x9A
 #define TCP_DATA_PAYLOAD	0x36
-
-#define MAC_I2C_HANDLE	hi2c1
 
 #define _SET_DEFAULT_IP_TEST	0
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 osThreadId ethernetTaskHandle;
-
-extern I2C_HandleTypeDef hi2c1;
-extern SPI_HandleTypeDef hspi1;
 
 #ifdef _DHCP_
 uint8_t dhcpsvrip[4] = { 168, 124, 101, 2 };
@@ -56,6 +60,7 @@ uint8_t dnsip[4] = { 0, 0, 0, 0 };
 #endif
 
 static uint8_t mymac[6] = { 0x54, 0x57, 0x51, 0x10, 0x05, 0x25 };
+
 mac_ip_addr g_ip_net;
 
 CCMRAM uint8_t eth_buf[ETH_BUFFER_SIZE+1];
@@ -138,7 +143,7 @@ static int read_packet(void)
 	tmp_cnt = Ethernet_PacketReceive(ETH_BUFFER_SIZE, eth_buf);
 	dat_p = Ethernet_packetloop_icmp_tcp(eth_buf, tmp_cnt);
 	if (dat_p > 0){
-		//LOG_HEX_DUMP(eth_buf, tmp_cnt, "Received Data >>");
+//		LOG_HEX_DUMP(eth_buf, tmp_cnt, "Received Data >>");
 #if 0
 		static uint8_t recv_buf[50];
 
@@ -146,7 +151,7 @@ static int read_packet(void)
 		push_event0_param(EVT_received_tcp, recv_buf, tmp_cnt - dat_p);
 		offset = make_reply_data(&eth_buf[TCP_DATA_PAYLOAD]);
 #else
-		//LOG_HEX_DUMP(&eth_buf[TCP_DATA_PAYLOAD], tmp_cnt - dat_p, "Received Data >>");
+//		LOG_HEX_DUMP(&eth_buf[TCP_DATA_PAYLOAD], tmp_cnt - dat_p, "Received Data >>");
 		offset = m_remote_eth_parser(&eth_buf[TCP_DATA_PAYLOAD], tmp_cnt - dat_p);
 #endif
 		if(offset <= 0){
@@ -191,8 +196,8 @@ static int ethernet_init(void)
 	Ethernet_client_set_gwip(g_ip_net.ip_net.gateway);
 #endif
 
-	LOG_DBG("myip = %d.%d.%d.%d \r\n", g_ip_net.ip_net.ipaddr[0],g_ip_net.ip_net.ipaddr[1],
-									g_ip_net.ip_net.ipaddr[2],g_ip_net.ip_net.ipaddr[3]);
+	LOG_DBG("myip = %d.%d.%d.%d : %d\r\n", g_ip_net.ip_net.ipaddr[0],g_ip_net.ip_net.ipaddr[1],
+									g_ip_net.ip_net.ipaddr[2],g_ip_net.ip_net.ipaddr[3], g_ip_net.ip_net.port);
 
 	return 0;
 }
@@ -239,33 +244,61 @@ uint8_t ENC28J60_TransceiveByte(uint8_t data) {
 
 int m_eth_write_mac_ipaddr(ip_net_t *ip_addr)
 {
-	uint8_t buffer[32]={0,}, size;
+#if (USE_CFG_ETH_E2P == 0)
+	uint8_t buffer[32]={0,}, size, change_ip = 0;
 	uint16_t mem_address;
 
 	mem_address = 0;
 	size = sizeof(g_ip_net);
 	g_ip_net.id[0] = 'Y';
 	g_ip_net.id[1] = 'S';
+#else
+	uint8_t change_ip = 0;
+#endif
+	for(int i = 0; i < 4; i++){
+		if(g_ip_net.ip_net.ipaddr[i] != ip_addr->ipaddr[i]){
+			change_ip = 1;
+			break;
+		}
+	}
+	if((change_ip==0) && (g_ip_net.ip_net.port == ip_addr->port)){
+		LOG_DBG("Return Same IP");
+		return 0;
+	}
+
 	memcpy(&g_ip_net.ip_net, ip_addr, sizeof(ip_net_t));
+#if (USE_CFG_ETH_E2P == 0)
 	memcpy(buffer, &g_ip_net, sizeof(mac_ip_addr));
 	LOG_HEX_DUMP(buffer, size, "Write E2p");
 	if(m_env_e2p_write(&MAC_I2C_HANDLE, AT24EEP_ADDR, mem_address, 1, buffer, size)){
 		LOG_ERR("Set IP Address from MacIC Error");
 		return 1;
 	}
+#endif
+	memcpy( m_app_cfg->model.IpAddress.ipaddr, g_ip_net.ip_net.ipaddr, 4);
+	memcpy( m_app_cfg->model.IpAddress.gateway, g_ip_net.ip_net.gateway, 4);
+	m_app_cfg->model.IpAddress.port = g_ip_net.ip_net.port;
 
+	LOG_DBG("IP addr[%d.%d.%d.%d]Port[%d] GateWay[%d.%d.%d.%d]",
+			g_ip_net.ip_net.ipaddr[0], g_ip_net.ip_net.ipaddr[1], g_ip_net.ip_net.ipaddr[2],g_ip_net.ip_net.ipaddr[3], g_ip_net.ip_net.port,
+			g_ip_net.ip_net.gateway[0], g_ip_net.ip_net.gateway[1], g_ip_net.ip_net.gateway[2], g_ip_net.ip_net.gateway[3]);
 	Ethernet_init_ip_arp_udp_tcp(mymac, g_ip_net.ip_net.ipaddr, g_ip_net.ip_net.port);
 	Ethernet_client_set_gwip(g_ip_net.ip_net.gateway);
+
+	app_config_save();
+
 	return 0;
 }
 
 static int read_ipnet(void)
 {
+#if (USE_CFG_ETH_E2P == 0)
 	uint8_t buffer[32]={0,}, size;
 	uint16_t mem_address;
 
 	mem_address = 0;
 	size = sizeof(mac_ip_addr);
+
 	if(m_env_e2p_read(&MAC_I2C_HANDLE, AT24EEP_ADDR, mem_address, 1, buffer, size)){
 		LOG_ERR("Get IP Address from MacIC Error\r\n");
 		return 1;
@@ -284,6 +317,11 @@ static int read_ipnet(void)
 		return 1;
 	}
 
+#else
+	memcpy( g_ip_net.ip_net.ipaddr, m_app_cfg->model.IpAddress.ipaddr, 4);
+	g_ip_net.ip_net.port = m_app_cfg->model.IpAddress.port;
+#endif
+
 	return 0;
 }
 
@@ -293,7 +331,6 @@ static void onWriteIPAddress(void *pData, uint32_t size)
 	int error;
 	model_ip_net_t *Data = pData;
 
-	memcpy(ipnet.submask, Data->submask, sizeof(ipnet.submask));
 	memcpy(ipnet.ipaddr, Data->ipaddr, sizeof(ipnet.ipaddr));
 
 	ipnet.gateway[0] = Data->ipaddr[0];
@@ -305,6 +342,7 @@ static void onWriteIPAddress(void *pData, uint32_t size)
 
 
 	LOG_DBG("IP Addr[%03d.%03d.%03d.%03d : %d]", ipnet.ipaddr[0], ipnet.ipaddr[1], ipnet.ipaddr[2], ipnet.ipaddr[3], ipnet.port)
+
 	error = m_eth_write_mac_ipaddr(&ipnet);
 	REPORT_IF_ERROR(error);
 	ethernet_init();
@@ -316,6 +354,11 @@ static void On_set_mode(remote_mode_t mode)
 		LOG_DBG("Start Ether Control");
 	}
 	m_cfg.run_mode = mode;
+}
+
+void m_eth_set_prev_set_mode(remote_mode_t mode)
+{
+	On_set_mode(mode);
 }
 
 void m_eth_set_trigger(uint8_t *response)

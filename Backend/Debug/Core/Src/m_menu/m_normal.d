@@ -57,6 +57,7 @@ Core/Src/m_menu/m_normal.o: ../Core/Src/m_menu/m_normal.c \
  D:/project/yns/MSV2008/Backend/Core/Src/m_env/m_env.h \
  D:/project/yns/MSV2008/Backend/Core/Src/m_serial/m_remote.h \
  D:/project/yns/MSV2008/Backend/Core/Src/m_serial/fpga_proc.h \
+ D:/project/yns/MSV2008/Backend/Core/Src/m_ether/m_ether.h \
  D:/project/yns/MSV2008/Backend/Core/Src/config/app_state.h \
  D:/project/yns/MSV2008/Backend/Core/Src/config/app_config.h \
  D:/project/yns/MSV2008/Backend/Core/Src/config/app_config_flash.h \
@@ -121,6 +122,7 @@ D:/project/yns/MSV2008/Backend/Core/Src/m_event/macros_common.h:
 D:/project/yns/MSV2008/Backend/Core/Src/m_env/m_env.h:
 D:/project/yns/MSV2008/Backend/Core/Src/m_serial/m_remote.h:
 D:/project/yns/MSV2008/Backend/Core/Src/m_serial/fpga_proc.h:
+D:/project/yns/MSV2008/Backend/Core/Src/m_ether/m_ether.h:
 D:/project/yns/MSV2008/Backend/Core/Src/config/app_state.h:
 D:/project/yns/MSV2008/Backend/Core/Src/config/app_config.h:
 D:/project/yns/MSV2008/Backend/Core/Src/config/app_config_flash.h:

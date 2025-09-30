@@ -20,7 +20,12 @@ extern app_config_t *m_app_cfg;
 /* Exported functions prototypes ---------------------------------------------*/
 int app_config_init(void);
 int app_config_reset(void);
+#if 1
+int app_config_save_dbg(const char *call_func, int line);
+#define app_config_save()	app_config_save_dbg(__func__, __LINE__)
+#else
 int app_config_save(void);
+#endif
 int app_config_save_file(int file_num, char *file_name);
 int app_config_load_file(int file_num);
 int app_config_read_file(uint8_t file_list[][MAX_SAVE_NAME_LEN]);
